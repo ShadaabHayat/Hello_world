@@ -3,7 +3,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $root.Release.Name }}-connector-{{ $connector }}-job
+  name: {{ $root.Release.Name }}-connector-{{ $connector }}-job-{{ include "configmapChecksum" . }}
+  # name: {{ $root.Release.Name }}-connector-{{ $connector }}-job
   namespace: {{ $root.Release.Namespace }}
   annotations:
     configmap.hash: {{ (lookup "v1" "ConfigMap" $root.Release.Namespace "$root.Release.Name-connector-configs").data | toJson | b64enc }}
