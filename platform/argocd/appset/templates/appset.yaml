@@ -7,7 +7,7 @@ spec:
   - git:
       name: ingestion-engine
       namespace: aicore
-      repoURL: https://github.com/extremenetworks/aicore-ingestion-engine.git
+      repoURL: https://github.com/ShadaabHayat/Hello_world.git
       revision: shadaab-test
       directories:
         - path: platform/helm
@@ -24,7 +24,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL:  https://github.com/extremenetworks/aicore-ingestion-engine.git
+        repoURL:  https://github.com/ShadaabHayat/Hello_world.git
         targetRevision: shadaab-test
         plugin:
           name: argocd-vault-plugin-helm
