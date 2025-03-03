@@ -1,15 +1,13 @@
-{{- define "jobYaml" }}
-{{- $root := .root }}
-{{- $connector := .connector }}
-{{- $jobName := printf "%s-connector-%s-job-%s" $root.Release.Name $connector .jobSuffix }}
----
+{{ $root := . }}
+{{ range $connector := $root.Values.connectors }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $jobName }}
+  name: {{ $root.Release.Name }}-connector-{{ $connector }}-job
+  # generateName: {{ $connector }}-job-
   namespace: {{ $root.Release.Namespace }}
   annotations:
-    configmap.hash: {{ (lookup "v1" "ConfigMap" $root.Release.Namespace (printf "%s-connector-configs" $root.Release.Name)).data | toJson | b64enc }}
+    # configmap.hash: {{ (lookup "v1" "ConfigMap" $root.Release.Namespace "$root.Release.Name-connector-configs").data | toJson | b64enc }}
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
@@ -19,9 +17,11 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ $jobName }}
+        app: {{ $root.Release.Name }}-connector-{{ $connector }}-job
+
     spec:
       restartPolicy: Never
+
       initContainers:
         - name: wait-for-kafka-connect
           image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
@@ -33,6 +33,7 @@ spec:
           env:
             - name: KAFKA_CONNECT_URI
               value: {{ $root.Values.kafkaConnectHost }}.{{ $root.Release.Namespace }}.svc.cluster.local:{{ $root.Values.kafkaConnectPort }}
+
       containers:
         - name: {{ $connector }}-connector
           image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
@@ -49,18 +50,17 @@ spec:
             - -c
             - |
               echo "Kafka Connect ${CONNECTOR_NAME} Connector configuration complete."
-              sleep 5
+              sleep 20
+
           volumeMounts:
             - name: configmap
               mountPath: /etc/config-s3-{{ $connector }}.json
               subPath: {{ $connector }}-configs.json
+
       volumes:
         - name: configmap
           configMap:
             name: {{ $root.Release.Name }}-connector-configs
-{{- end }}
 
-{{- range $connector := .Values.connectors }}
-{{- $jobSuffix := include "jobYaml" (dict "root" $ "connector" $connector "jobSuffix" "") | toYaml | sha256sum | trunc 10 }}
-{{- include "jobYaml" (dict "root" $ "connector" $connector "jobSuffix" $jobSuffix) }}
-{{- end }}
+---
+{{ end }}
