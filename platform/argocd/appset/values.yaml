@@ -1,0 +1,6 @@
+configRepoName: xcloud-appconfig
+configBranch: main
+cluster_name: g2r1
+
+# This sync policy pertains to the ApplicationSet, not to the Applications it creates.
+syncPolicy: sync

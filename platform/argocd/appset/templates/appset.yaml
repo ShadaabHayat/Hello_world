@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  generators:
+  - git:
+      name: ingestion-engine
+      namespace: aicore
+      repoURL: https://github.com/extremenetworks/aicore-ingestion-engine.git
+      revision: shadaab/testing-argocd-deployment
+      directories:
+        - path: platform/helm
+
+  # - list:
+  #     elements:
+  #     -  name: ingestion-engine
+  #        chartName: ingestion-engine
+  #        version: {{ default .Chart.Version }}
+  #        namespace: aicore
+  template:
+    metadata:
+      name: '{{ "{{name}}" }}'
+    spec:
+      project: default
+      source:
+        repoURL:  https://github.com/extremenetworks/aicore-ingestion-engine.git
+        targetRevision: shadaab/testing-argocd-deployment
+        plugin:
+          name: argocd-vault-plugin-helm
+          env:
+            - name: CONFIG_REPO_URL
+              value: git@github.com:extremenetworks
+            - name: CONFIG_REPO_NAME
+              value: {{ .Values.configRepoName }}
+            - name: CONFIG_REPO_KEY
+              value: {{ .Values.configRepoName | upper | replace "-" "_" }}_KEY
+            - name: CONFIG_BRANCH
+              value: {{ .Values.configBranch }}
+            - name: CONFIG_BASE
+              value: {{ .Release.Name }}
+            - name: GLOBAL_VALUES
+              value: platform/argocd/{{ .Release.Name }}/{{ .Values.cluster_name }}/global.yaml
+            - name: APP_VALUES
+              value: platform/argocd/{{ .Release.Name }}/{{ .Values.cluster_name }}/{{`{{name}}`}}.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ "{{namespace}}" }}'
+      syncPolicy:
+        automated: 
+          prune: true
+        syncOptions:
+        - CreateNamespace=true
+        - FailFast=true  # enable global FailFast, so any step will stop when fail

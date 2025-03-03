@@ -1,0 +1,18 @@
+apiVersion: v2
+name: ingestion-engine
+description: Helm Chart for Ingestion Engine Connectors. Consists for two jobs and a configmap. One job is for the main connector and the other is for the DLQ connector.
+
+type: application
+
+version: 0.1.0
+
+appVersion: "1.16.0"
+
+dependencies:
+  - name: cp-kafka-connect
+    version: ^0.1.0
+    repository: file://charts/cp-kafka-connect
+  - name: cp-schema-registry
+    version: ^0.1.0
+    repository: file://charts/cp-schema-registry
+    condition: cp-schema-registry.enabled

@@ -1,0 +1,88 @@
+name: Helm Build AICORE
+
+on:
+  # workflow_call:
+  #   inputs:
+  #     VERSION:
+  #       description: "Version of the Helm charts"
+  #       required: true
+  #       type: string
+  #       default: "1.0.0"
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: "Version of the Helm charts"
+        required: true
+        type: string
+        default: "1.0.0"
+
+env:
+  VERSION: ${{ github.event.inputs.VERSION }}
+  # REPOSITORY: ${ GITHUB_REPOSITORY }
+  REPOSITORY: aicore-ingestion-engine
+  DEST_IP: ${{ vars.HELM_DEST_IP }}
+  DEST_DIR: "/mnt/charts/html/charts/aicore/"  # Destination directory for the packaged charts
+  HELM_REPO: "https://charts.xcloudiq.com/charts/aicore/"
+
+jobs:
+  helm-aicore-build:
+    runs-on: self-hosted
+    # runs-on: ubuntu-latest
+    
+    steps:        
+      - name: Checkout Repository
+        # To check out cwd
+        # uses: actions/checkout@v4
+        # with:
+        uses: actions/checkout@v3
+        with:
+          repository: extremenetworks/${{ env.REPOSITORY }} # Replace with your organization/repository
+          token: ${{ secrets.AI_EXPERT_GITHUB_ACTIONS_TOKEN }}
+          path: ${{ env.REPOSITORY }} # The directory to check out the repo into
+          ref: ${{ github.ref_name }}
+
+      - name: Helm tool installer
+        uses: Azure/setup-helm@v4.2.0
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.HELM_BUILD_SECRET }}
+
+      - name: Clear Existing Helm Index
+        run: |
+            rm -fr ${{ env.DEST_DIR }}
+            mkdir -p ${{ env.DEST_DIR }}
+
+      - name: Package Helm Charts
+        run: |
+            ssh -o StrictHostKeyChecking=no root@${{ env.DEST_IP }} "mkdir -p ${{ env.DEST_DIR }}"
+            cd ${{ github.workspace }}/${{ env.REPOSITORY }}/platform/helm
+            
+            echo "Triggering workflow from repository: $GITHUB_REPOSITORY"
+            # echo "Packaging charts for ${{ env.REPOSITORY }}"
+            helm package -d ./ . --version=${{ env.VERSION }}
+                        
+            chmod 644 *.tgz
+            rsync -avt -e "ssh -o StrictHostKeyChecking=no" *.tgz root@${{ env.DEST_IP }}:${{ env.DEST_DIR }}
+            rm *.tgz
+
+            cd ${{ github.workspace }}/${{ env.REPOSITORY }}/platform/argocd/appset
+            helm package -d ./ . --version=${{ env.VERSION }}
+                        
+            chmod 644 *.tgz
+            rsync -avt -e "ssh -o StrictHostKeyChecking=no" *.tgz root@${{ env.DEST_IP }}:${{ env.DEST_DIR }}
+            rm *.tgz
+            echo "Pushing the charts to charts server."
+            
+      - name: Update Helm Repo Index
+        run: |
+            echo "Updated Helm repo index for ${{ env.DEST_DIR }} with the URL ${{ env.HELM_REPO }}"
+            ssh -o StrictHostKeyChecking=no root@${{ env.DEST_IP }} "helm repo index ${{ env.DEST_DIR }} --url ${{ env.HELM_REPO }}"
+            echo "helm repo index ${{ env.DEST_DIR }} --url ${{ env.HELM_REPO }}"
+            ssh -o StrictHostKeyChecking=no root@${{ env.DEST_IP }} "cat ${{ env.DEST_DIR }}index.yaml"
+
+      - name: Stop SSH Agent
+        if: always()
+        # run: ssh-agent -k
+        run: rm -rf $GITHUB_WORKSPACE/*

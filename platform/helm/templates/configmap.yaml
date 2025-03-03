@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-connector-configs
+  namespace: aicore
+  labels:
+    app: {{ .Release.Name }}
+data:
+  {{- include "jsonConfigs" . | indent 2 }}
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-envs
+  namespace: aicore
+  labels:
+    app: {{ .Release.Name }}
+  annotations:
+    avp.kubernetes.io/path: "/v1/kv/data/aicore/{{ .Values.global.cluster_name }}"
+data:
+  {{- with (tpl ($.Files.Get "config/env.yaml") $ | fromYaml).envVars }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}

@@ -1,0 +1,25 @@
+# Default values for k6-load-test
+replicaCount: 1
+
+image:
+  repository: jawadahmadd/k6-load-testing
+  tag: v4
+  pullPolicy: Always
+
+config:
+  kafkaBrokers: "b-2.ztaqamskcluster.0fhvrm.c4.kafka.eu-central-1.amazonaws.com:9092,b-1.ztaqamskcluster.0fhvrm.c4.kafka.eu-central-1.amazonaws.com:9092"
+  schemaRegistryUrl: "http://aicore-kafka-schema-registry:8081"
+  resourceDeviceTopic: "aicore-resource-device"
+  userTopic: "aicore-users-topic"
+  k6Vus: "100"
+  k6Duration: "2s"
+  partitionsCountForTopic: "4"
+
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: ""
+
+service:
+  type: ClusterIP
+  port: 80

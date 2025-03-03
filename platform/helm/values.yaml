@@ -1,0 +1,50 @@
+global:
+  cluster_name: ztna1r1
+
+replicaCount: 1
+
+image:
+  repository: public.ecr.aws/extremecloud/al # Extreme's ECR Amazon Linux 2 image
+  tag: 2
+
+env: {}
+
+# List of connectors to enable. The configuration for each connector will be
+# read from a file with the same name in the config folder.
+connectors:
+  - main
+  - dlq
+
+# Overrides allow modifying values in a connector's default configuration or defining a new connector.
+# Example:
+# configOverrides:
+#   anotherMain:
+#     inherit: "config/main.yaml"  # Inherit settings from an existing configuration file
+#     key: "value"  # Define custom values
+configOverrides: {}
+
+kafkaConnectHost: aicore-kafka-connect
+kafkaConnectPort: 8083
+
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "50m"
+  limits:
+    memory: "128Mi"
+    cpu: "100m"
+
+cp-kafka-connect:
+  image: 081731760779.dkr.ecr.us-east-1.amazonaws.com/aicore/kafka-connect-custom
+  imageTag: premain_285a23f
+  cp-schema-registry:
+   url: "aicore-kafka-schema-registry:8081"
+  kafka:
+    bootstrapServers: "PLAINTEXT://common-kafka.common.svc.cluster.local:9092"
+
+cp-schema-registry:
+  enabled: false
+  image: 081731760779.dkr.ecr.us-east-1.amazonaws.com/aicore/custom-images/confluentinc/cp-schema-registry
+  imageTag: 7.7.1
+  kafka:
+    bootstrapServers: "PLAINTEXT://common-kafka.common.svc.cluster.local:9092"

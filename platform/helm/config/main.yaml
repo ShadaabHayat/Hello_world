@@ -1,0 +1,19 @@
+# Specify a parent configuration file to be merged with this configuration set.
+# Values defined here will override those in the parent configuration.
+inherit: "config/base.yaml"
+# All keys must be flat.
+behavior.on.null.values: "ignore"
+errors.deadletterqueue.context.headers.enable: true
+errors.deadletterqueue.topic.name: "aicore-dlq"
+errors.deadletterqueue.topic.replication.factor: "1"
+format.class: "io.confluent.connect.s3.format.parquet.ParquetFormat"
+parquet.codec: "gzip"
+partition.duration.ms: "3600000"
+predicates: "match_resources_devicegroup_devices_and_end_system_topic_name"
+rotate.interval.ms: "-1"
+rotate.schedule.interval.ms: "300000"
+s3.part.size: "5242880"
+tasks.max: "4"
+topics: "aicore.public.resources_device,aicore.public.resources_devicegroup,aicore.public.users_user,aicore.public.access_groups_accessgroup,aicore.public.users_useraccessgroups,aicore.public.resources_service,aicore.public.resources_project,aicore.public.resources_projectservice,aicore.public.policies_policy,aicore.public.end_systems"
+topics.dir: "warehouse"
+transforms: "InsertRDCInfo, InsertEnvInfo, Mask_aicore_public_users_user, Mask_aicore_public_resources_device"

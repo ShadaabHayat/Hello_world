@@ -1,0 +1,10 @@
+apiVersion: v2
+name: k6-load-test
+description: A Helm chart for K6 Load Testing of the ingestion engine
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+maintainers:
+  - name: Jawad Ahmad
+    email: jahmad@extremenetworks.com

@@ -1,0 +1,74 @@
+{{ $root := . }}
+{{ range $connector := $root.Values.connectors }}
+{{- printf "Creating job for connector: %s" $connector | indent 4 }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $root.Release.Name }}-connector-{{ $connector }}-job
+  namespace: {{ $root.Release.Namespace }}
+  annotations:
+    configmap.hash: {{ (lookup "v1" "ConfigMap" $root.Release.Namespace "$root.Release.Name-connector-configs").data | toJson | b64enc }}
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: {{ $root.Release.Name }}-connector-{{ $connector }}-job
+
+    spec:
+      restartPolicy: Never
+
+      initContainers:
+        - name: wait-for-kafka-connect
+          image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache curl
+              echo "Kafka Connect not available."
+              exit 1
+          env:
+            - name: KAFKA_CONNECT_URI
+              value: {{ $root.Values.kafkaConnectHost }}.{{ $root.Release.Namespace }}.svc.cluster.local:{{ $root.Values.kafkaConnectPort }}
+
+      containers:
+        - name: {{ $connector }}-connector
+          image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
+          envFrom:
+            - configMapRef:
+                name: {{ $root.Release.Name }}-envs
+          env:
+            - name: KAFKA_CONNECT_URI
+              value: {{ $root.Values.kafkaConnectHost }}.{{ $root.Release.Namespace }}.svc.cluster.local:{{ $root.Values.kafkaConnectPort }}
+            - name: CONNECTOR_NAME
+              value: {{ $connector }}
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache curl
+              apk add --no-cache gettext
+              echo "Kafka Connect ${CONNECTOR_NAME} Connector configuration complete."
+
+          volumeMounts:
+            - name: configmap
+              mountPath: /etc/config-s3-{{ $connector }}.json
+              subPath: {{ $connector }}-configs.json
+
+      volumes:
+        - name: configmap
+          configMap:
+            name: {{ $root.Release.Name }}-connector-configs
+
+      resources:
+        requests:
+          memory: {{ $root.Values.resources.requests.memory }}
+          cpu: {{ $root.Values.resources.requests.cpu }}
+        limits:
+          memory: {{ $root.Values.resources.limits.memory }}
+          cpu: {{ $root.Values.resources.limits.cpu }}
+---
+{{ end }}

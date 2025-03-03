@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aicore-ingestion
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/extremenetworks/aicore-ingestion-engine.git
+    targetRevision: shadaab/testing-argocd-deployment
+    path: platform/argocd/appset
+    helm:
+      releaseName: aicore-ingestion
+      parameters:
+      - name: configRepoName
+        value: aicore-ingestion-engine
+      - name: configBranch
+        value: shadaab/testing-argocd-deployment
+      - name: cluster_name
+        value: cop1r1
+      - name: syncPolicy
+        value: sync
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

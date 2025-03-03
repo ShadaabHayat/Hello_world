@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  k6:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./reports:/reports
+    environment:
+      KAFKA_BROKERS: "kafka1:29092"
+      SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      RESOURCE_DEVICE_TOPIC_NAME: "aicore-resource-device"
+      USER_TOPIC_NAME: "aicore-users-topic"
+      K6_VUS: "100"
+      K6_DURATION: "2s"
+      PARTITIONS_COUNT_FOR_TOPIC: "4"
+
+networks:
+  default:
+    external:
+      name: my-network

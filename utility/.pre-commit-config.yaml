@@ -1,0 +1,45 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude: kafka-connect-transformations/src/test/.*
+      - id: trailing-whitespace
+        exclude: (kafka-connect-transformations/src/tests/.*)
+      - id: check-added-large-files
+      - id: check-json
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args:
+          [
+            "--config",
+            "utility/.markdownlint.yaml",
+            "--ignore",
+            ".aws",
+            "--ignore",
+            ".git",
+            "--disable",
+            "MD041",
+            "--disable",
+            "MD043",
+            "--fix",
+          ]
+  - repo: local
+    hooks:
+      - id: java-checkstyle-staged
+        name: Java Checkstyle (staged files only)
+        entry: utility/check-staged-java.sh
+        language: script
+        files: \.java$
+        stages: [commit]
+  - repo: local
+    hooks:
+      - id: java-checkstyle-all
+        name: Java Checkstyle (all files)
+        entry: utility/check-all-files.sh
+        language: script
+        files: \.java$
+        stages: [commit]

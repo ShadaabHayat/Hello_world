@@ -1,0 +1,14 @@
+# Specify a parent configuration file to be merged with this configuration set.
+# Values defined here will override those in the parent configuration.
+inherit: "config/base.yaml"
+# All keys must be flat.
+errors.log.enable: true
+errors.log.include.messages: true
+format.class: "io.confluent.connect.s3.format.json.JsonFormat"
+partition.duration.ms: "60000"
+predicates: "match_resources_devicegroup_devices_and_end_system_topic_name"
+s3.compression.type: "none"
+tasks.max: "1"
+topics: "aicore-dlq"
+topics.dir: "dlq"
+transforms: "InsertRDCInfo, InsertEnvInfo, Mask_aicore_public_users_user, Mask_aicore_public_resources_device"

@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: locust-load-test
+  namespace: aicore
+  labels:
+    app: locust-load-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: locust-load-test
+  template:
+    metadata:
+      labels:
+        app: locust-load-test
+    spec:
+      containers:
+      - name: locust
+        image: jawadahmadd/load-testing:v16
+        imagePullPolicy: Always
+        env:
+        - name: LOCUST_FILE
+          value: "locustfile.py"
+        - name: LOCUST_HOST
+          value: "http://localhost"
+        - name: LOCUST_USERS
+          value: "50"
+        - name: LOCUST_SPAWN_RATE
+          value: "2"
+        - name: LOCUST_RUN_TIME
+          value: "3600"
+        - name: LOCUST_HEADLESS
+          value: "true"
+        - name: resource_db
+          valueFrom:
+            secretKeyRef:
+              name: aicore-rds-creds-resource
+              key: postgres_db
+        - name: resource_user
+          valueFrom:
+            secretKeyRef:
+              name: aicore-rds-creds-resource
+              key: postgres_user
+        - name: resource_password
+          valueFrom:
+            secretKeyRef:
+              name: aicore-rds-creds-resource
+              key: postgres_password
+        - name: resource_host
+          valueFrom:
+            secretKeyRef:
+              name: aicore-rds-creds-resource
+              key: postgres_host
+        - name: resource_port
+          valueFrom:
+            secretKeyRef:
+              name: aicore-rds-creds-resource
+              key: postgres_port
+        - name: auth_db
+          valueFrom:
+            secretKeyRef:
+              name: aicore-rds-creds-auth
+              key: postgres_db
+        - name: auth_user
+          valueFrom:
+            secretKeyRef:
+              name: aicore-rds-creds-auth
+              key: postgres_user
+        - name: auth_password
+          valueFrom:
+            secretKeyRef:
+              name: aicore-rds-creds-auth
+              key: postgres_password
+        - name: auth_host
+          valueFrom:
+            secretKeyRef:
+              name: aicore-rds-creds-auth
+              key: postgres_host
+        - name: auth_port
+          valueFrom:
+            secretKeyRef:
+              name: aicore-rds-creds-auth
+              key: postgres_port
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1024Mi"
+          limits:
+            cpu: "800m"
+            memory: "1024Mi"

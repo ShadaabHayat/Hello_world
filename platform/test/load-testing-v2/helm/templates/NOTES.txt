@@ -1,0 +1,18 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To check the status of your load test, run:
+  kubectl get pods -l app={{ .Release.Name }}-load-test
+
+To view the logs of the load test:
+  kubectl logs -f deployment/{{ .Release.Name }}-load-test
+
+The test results will be stored in the persistent volume at:
+  /reports directory
+
+Configuration:
+  Kafka Brokers: {{ .Values.config.kafkaBrokers }}
+  Schema Registry: {{ .Values.config.schemaRegistryUrl }}
+  Virtual Users: {{ .Values.config.k6Vus }}
+  Duration: {{ .Values.config.k6Duration }}

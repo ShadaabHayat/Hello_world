@@ -1,0 +1,28 @@
+# Environment
+environment = "dev"  # or "prod", "staging", etc.
+
+# AWS Secrets role and region, this is where the secrets are created
+secrets_role_arn = "secret role arn"
+secrets_region = "us-east-2"
+
+# AWS Terraform state region, this is the region where terraform store the state
+state_region = "us-east-1"
+
+# S3 Bucket Configuration
+role_arn        = "uztna-data-dev"  # Customize for your environment
+session_name = "123456789012"    # Replace with your AWS account ID
+external_id       = "your-external-id" # Replace with your external ID
+
+# Resource Database Configuration
+resource_db_username = "resource_user"
+resource_db_password = "your-secure-password"  # Replace with actual password
+resource_db_host     = "your-resource-db-host.region.rds.amazonaws.com"
+resource_db_name     = "resource_db"
+resource_db_port     = 5432  # Default PostgreSQL port
+
+# Auth Database Configuration
+auth_db_username = "auth_user"
+auth_db_password = "your-secure-password"  # Replace with actual password
+auth_db_host     = "your-auth-db-host.region.rds.amazonaws.com"
+auth_db_name     = "auth_db"
+auth_db_port     = 5432  # Default PostgreSQL port

@@ -1,0 +1,32 @@
+{
+  "horusec": {
+    "enableGitHistoryAnalysis": false,
+    "enableCommitAuthor": false,
+    "repositoryAuthorization": null,
+    "printOutputType": "json",
+    "enableInformationSeverity": true,
+    "enableVulnSeverityInfo": true,
+    "enableVulnSeverityLow": true,
+    "enableVulnSeverityMedium": true,
+    "enableVulnSeverityHigh": true,
+    "enableVulnSeverityCritical": true,
+    "severitiesConfig": {
+      "info": true,
+      "low": true,
+      "medium": true,
+      "high": true,
+      "critical": true
+    },
+    "filesToIgnore": [
+      "**/target/**",
+      "**/.git/**",
+      "**/.idea/**"
+    ],
+    "projectPath": "./ingestion-engine/custom-smt/src/main/java",
+    "tools_config": {
+      "HorusecEngine": {
+        "istoignore": false
+      }
+    }
+  }
+}
