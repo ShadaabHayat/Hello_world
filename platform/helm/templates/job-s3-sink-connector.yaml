@@ -3,7 +3,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  # name: {{ $root.Release.Name }}-connector-{{ $connector }}-job
+  name: {{ $root.Release.Name }}-connector-{{ $connector }}-job
   # generateName: {{ $connector }}-job-
   namespace: {{ $root.Release.Namespace }}
   annotations:
