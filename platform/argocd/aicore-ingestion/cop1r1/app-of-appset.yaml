@@ -6,8 +6,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/extremenetworks/aicore-ingestion-engine.git
-    targetRevision: shadaab/testing-argocd-deployment
+    repoURL: https://github.com/ShadaabHayat/Hello_world.git
+    targetRevision: shadaab-test
     path: platform/argocd/appset
     helm:
       releaseName: aicore-ingestion
@@ -15,7 +15,7 @@ spec:
       - name: configRepoName
         value: aicore-ingestion-engine
       - name: configBranch
-        value: shadaab/testing-argocd-deployment
+        value: shadaab-test
       - name: cluster_name
         value: cop1r1
       - name: syncPolicy
