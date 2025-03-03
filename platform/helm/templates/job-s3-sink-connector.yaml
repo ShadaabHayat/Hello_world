@@ -1,6 +1,5 @@
 {{ $root := . }}
 {{ range $connector := $root.Values.connectors }}
-{{- printf "Creating job for connector: %s" $connector | indent 4 }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -59,12 +58,5 @@ spec:
           configMap:
             name: {{ $root.Release.Name }}-connector-configs
 
-      resources:
-        requests:
-          memory: {{ $root.Values.resources.requests.memory }}
-          cpu: {{ $root.Values.resources.requests.cpu }}
-        limits:
-          memory: {{ $root.Values.resources.limits.memory }}
-          cpu: {{ $root.Values.resources.limits.cpu }}
 ---
 {{ end }}
