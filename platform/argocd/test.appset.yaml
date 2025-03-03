@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: test-appset
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/ShadaabHayat/Hello_world.git
+        revision: shadaab-test
+        directories:
+          - path: platform/helm
+  template:
+    metadata:
+      name: "document-ingestion"
+    spec:
+      project: default
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+        automated:
+          prune: true
+          selfHeal: true
+      source:
+        repoURL: https://github.com/ShadaabHayat/Hello_world.git
+        targetRevision: shadaab-test
+        path: "{{path}}"
+        helm:
+          valueFiles:
+           - values.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: aicore

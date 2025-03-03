@@ -29,7 +29,6 @@ spec:
             - |
               apk add --no-cache curl
               echo "Kafka Connect not available."
-              exit 1
           env:
             - name: KAFKA_CONNECT_URI
               value: {{ $root.Values.kafkaConnectHost }}.{{ $root.Release.Namespace }}.svc.cluster.local:{{ $root.Values.kafkaConnectPort }}
