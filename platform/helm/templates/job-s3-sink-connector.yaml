@@ -50,7 +50,7 @@ spec:
             - -c
             - |
               echo "Kafka Connect ${CONNECTOR_NAME} Connector configuration complete."
-              sleep 3600
+              sleep 120
 
           volumeMounts:
             - name: configmap
