@@ -8,8 +8,8 @@ metadata:
   namespace: {{ $root.Release.Namespace }}
   annotations:
     configmap.hash: {{ (lookup "v1" "ConfigMap" $root.Release.Namespace "$root.Release.Name-connector-configs").data | toJson | b64enc }}
-    argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookSucceeded
+    # argocd.argoproj.io/hook: Sync
+    # argocd.argoproj.io/hook-delete-policy: BeforeHookSucceeded
 spec:
   completions: 1
   parallelism: 1
