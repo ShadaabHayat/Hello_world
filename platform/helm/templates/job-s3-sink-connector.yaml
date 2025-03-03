@@ -55,7 +55,7 @@ spec:
       volumes:
         - name: configmap
           configMap:
-            name: {{ $root.Release.Name }}-connector-configs }}
+            name: {{ $root.Release.Name }}-connector-configs
 {{- end }}
 
 {{- range $connector := .Values.connectors }}
