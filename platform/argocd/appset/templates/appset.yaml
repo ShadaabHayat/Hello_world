@@ -20,7 +20,7 @@ spec:
   #        namespace: aicore
   template:
     metadata:
-      name: '{{ "{{name}}" }}'
+      name: ingestion-engine
     spec:
       project: default
       source:
