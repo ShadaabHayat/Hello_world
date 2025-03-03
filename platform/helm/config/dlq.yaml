@@ -5,7 +5,7 @@ inherit: "config/base.yaml"
 errors.log.enable: true
 errors.log.include.messages: true
 format.class: "io.confluent.connect.s3.format.json.JsonFormat"
-partition.duration.ms: "30000"
+partition.duration.ms: "70000"
 predicates: "match_resources_devicegroup_devices_and_end_system_topic_name"
 s3.compression.type: "none"
 tasks.max: "1"
