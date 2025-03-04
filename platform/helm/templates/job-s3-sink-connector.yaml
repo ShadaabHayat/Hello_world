@@ -9,7 +9,7 @@ metadata:
   name: {{ $jobName }}
   namespace: {{ $root.Release.Namespace }}
   annotations:
-    configmap.hash: {{ (lookup "v1" "ConfigMap" $root.Release.Namespace (printf "%s-connector-configs" $root.Release.Name)).data | toJson | b64enc }}
+    configmap.hash: {{ (lookup "v1" "ConfigMap" "aicore" "document-ingestion-connector-configs").data | toJson | b64enc }}
     # argocd.argoproj.io/hook: PostSync
     # argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
