@@ -21,7 +21,7 @@ spec:
 
     spec:
       restartPolicy: Never
-      ttlSecondsAfterFinished: 30
+      ttlSecondsAfterFinished: 60
       initContainers:
         - name: wait-for-kafka-connect
           image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
