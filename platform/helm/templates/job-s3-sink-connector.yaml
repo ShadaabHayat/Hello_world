@@ -8,8 +8,8 @@ metadata:
   namespace: {{ $root.Release.Namespace }}
   annotations:
     # configmap.hash: {{ (lookup "v1" "ConfigMap" $root.Release.Namespace "$root.Release.Name-connector-configs").data | toJson | b64enc }}
-    argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    # argocd.argoproj.io/hook: PostSync
+    # argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   completions: 1
   parallelism: 1
@@ -21,7 +21,7 @@ spec:
 
     spec:
       restartPolicy: Never
-
+      ttlSecondsAfterFinished: 30
       initContainers:
         - name: wait-for-kafka-connect
           image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
@@ -50,7 +50,7 @@ spec:
             - -c
             - |
               echo "Kafka Connect ${CONNECTOR_NAME} Connector configuration complete."
-              sleep 60
+              sleep 30
 
           volumeMounts:
             - name: configmap
