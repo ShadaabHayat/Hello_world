@@ -55,7 +55,7 @@ spec:
             - -c
             - |
               echo "Kafka Connect ${CONNECTOR_NAME} Connector configuration complete."
-              sleep 6
+              sleep 8
           volumeMounts:
             - name: configmap
               mountPath: /etc/config-s3-{{ $connector }}.json
