@@ -1,6 +1,11 @@
+{{- define "configmapHash" }}
+  {{- include "configmapYaml" . | toYaml | sha256sum | trunc 10 }}
+{{- end }}
+
 {{- define "jobYaml" }}
 {{- $root := .root }}
 {{- $connector := .connector }}
+{{- $configmapHash := include "configmapHash" $root }}
 {{- $jobName := printf "%s-connector-%s-job-%s" $root.Release.Name $connector .jobSuffix }}
 ---
 apiVersion: batch/v1
@@ -9,7 +14,8 @@ metadata:
   name: {{ $jobName }}
   namespace: {{ $root.Release.Namespace }}
   annotations:
-    configmap.hash: {{ (lookup "v1" "ConfigMap" "aicore" "document-ingestion-connector-configs").data | toJson | b64enc }}
+    configmap.hash: "{{ $configmapHash }}"
+    # helm.sh/hook-weight: 1
     # argocd.argoproj.io/hook: PostSync
     # argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:

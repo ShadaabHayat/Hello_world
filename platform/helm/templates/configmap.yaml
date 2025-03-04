@@ -1,12 +1,17 @@
+{{- define "configmapYaml" }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-connector-configs
-  namespace: aicore
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}
 data:
   {{- include "jsonConfigs" . | indent 2 }}
+{{- end }}
+
+{{- include "configmapYaml" . }}
 
 ---
 
@@ -14,7 +19,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-envs
-  namespace: aicore
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}
   annotations:
