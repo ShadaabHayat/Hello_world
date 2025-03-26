@@ -15,9 +15,6 @@ metadata:
   namespace: {{ $root.Release.Namespace }}
   annotations:
     configmap.hash: "{{ $configmapHash }}"
-    # helm.sh/hook-weight: 1
-    # argocd.argoproj.io/hook: PostSync
-    # argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   completions: 1
   parallelism: 1
