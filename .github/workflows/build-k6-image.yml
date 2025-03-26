@@ -32,7 +32,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::888507318922:role/deployment-terraform-role
-          role-duration-seconds: 7000
+          role-duration-seconds: 17000
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
