@@ -1,0 +1,56 @@
+name: Ingestion Engine E2E Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e-test:
+    name: E2E Test
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          cache: true
+          driver: podman
+          wait: false
+          cpus: 2
+          memory: 6144m
+          mount-path: "${{github.workspace}}/platform/test/e2e-testing:/e2e-code"
+          minikube-version: '1.35.0'
+          kubernetes-version: 'v1.32.0'
+
+      - name: Restore Kafka connect custom Image Cache if it exists
+        id: kafka-connect-image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/images/kafka-connect
+          key: kafka-connect-image-${{ hashFiles('**/resources/kafka-connect/Dockerfile') }}
+
+      - name: Build custom kafka connect docker image
+        if: steps.kafka-connect-image.outputs.cache-hit != 'true'
+        shell: bash
+        run: "platform/test/e2e-testing/scripts/build-kafka-connect.sh"
+
+      - name: Restore E2E test Image Cache if it exists
+        id: e2e-test-image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/images/e2e-test
+          key: e2e-test-image-${{ hashFiles('**/platform/test/e2e-testing/Dockerfile') }}
+
+      - name: Build E2E Test docker image
+        if: steps.e2e-test-image.outputs.cache-hit != 'true'
+        shell: bash
+        run: "platform/test/e2e-testing/scripts/build-e2e-test-image.sh"
+
+      - name: Deploy test components
+        shell: bash
+        run: "platform/test/e2e-testing/scripts/init-minikube.sh"
+
+      - name: Running tests
+        shell: bash
+        run: "platform/test/e2e-testing/scripts/run-e2e-test.sh"
