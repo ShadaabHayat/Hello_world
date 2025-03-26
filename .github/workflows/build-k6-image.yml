@@ -14,7 +14,7 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: k6-load-testing
+  ECR_REPOSITORY: aicore/k6-load-testing
 
 jobs:
   build-and-push:
@@ -32,7 +32,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::888507318922:role/deployment-terraform-role
-          role-duration-seconds: 3000
+          role-duration-seconds: 3600
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR

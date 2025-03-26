@@ -20,7 +20,7 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: kafka-connect-custom
+  ECR_REPOSITORY: aicore/kafka-connect-custom
   JAVA_VERSION: '17'
 
 jobs:
@@ -144,7 +144,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::438465127823:role/deployment-terraform-role
-          role-duration-seconds: 7000
+          role-duration-seconds: 3600
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
