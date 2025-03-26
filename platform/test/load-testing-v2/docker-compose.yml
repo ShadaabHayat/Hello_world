@@ -15,7 +15,7 @@ services:
       K6_VUS: "100"
       K6_DURATION: "2s"
       PARTITIONS_COUNT_FOR_TOPIC: "4"
-
+      SCHEMA_TYPE: "avro"
 networks:
   default:
     external:

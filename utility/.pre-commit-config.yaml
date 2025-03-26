@@ -33,7 +33,7 @@ repos:
         name: Java Checkstyle (staged files only)
         entry: utility/check-staged-java.sh
         language: script
-        files: \.java$
+        files: resources/kafka-connect/custom-smt/src/main/java/org/extremenetworks/com/.*\.java$
         stages: [commit]
   - repo: local
     hooks:
@@ -41,5 +41,5 @@ repos:
         name: Java Checkstyle (all files)
         entry: utility/check-all-files.sh
         language: script
-        files: \.java$
+        files: resources/kafka-connect/custom-smt/src/main/java/org/extremenetworks/com/.*\.java$
         stages: [commit]

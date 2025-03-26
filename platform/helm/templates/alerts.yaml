@@ -1,0 +1,28 @@
+{{- if .Values.prometheusAlerts.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Values.prometheusAlerts.name }}
+  namespace: monitoring
+spec:
+  groups:
+  - name: {{ .Values.prometheusAlerts.groupName }}
+    rules:
+    - alert: HighS3SinkRecordCount
+      annotations:
+        summary: "High active record count for {{ `{{ $labels.connector_name }}` }}"
+        description: "The active record count for S3 Sink '{{ `{{ $labels.connector_name }}` }}' has exceeded {{ .Values.prometheusAlerts.alerts.s3SinkRecordThreshold }} for more than {{ .Values.prometheusAlerts.alerts.s3SinkRecordDuration }}."
+      expr: sum(aicore_s3_sink_sink_record_active_count) by (connector_name) > {{ .Values.prometheusAlerts.alerts.s3SinkRecordThreshold }}
+      for: {{ .Values.prometheusAlerts.alerts.s3SinkRecordDuration }}
+      labels:
+        severity: {{ .Values.prometheusAlerts.alerts.s3SinkRecordSeverity }}
+    
+    - alert: ConnectorStatusDown
+      annotations:
+        summary: "Connector '{{ `{{ $labels.connector_name }}` }}' is down"
+        description: "The Kafka Connect connector '{{ `{{ $labels.connector_name }}` }}' has been in a non-running state for more than {{ .Values.prometheusAlerts.alerts.connectorStatusDuration }}."
+      expr: sum(aicore_kafka_connect_connector_status) by (connector_name) == 0
+      for: {{ .Values.prometheusAlerts.alerts.connectorStatusDuration }}
+      labels:
+        severity: {{ .Values.prometheusAlerts.alerts.connectorStatusSeverity }}
+{{- end }}

@@ -12,7 +12,8 @@
   {{ $inheritPath := coalesce $content.inherit $current.inherit "" }}
   {{ if $content.inherit }}
     {{ $_ := unset $content "inherit" }}
-  {{ else if $current.inherit }}
+  {{ end }}
+  {{ if $current.inherit }}
     {{ $_ := unset $current "inherit" }}
   {{ end }}
   # Merge with existing content
@@ -32,7 +33,7 @@
 {{- $files := .Files }}
 {{- $overrides := .Values.configOverrides | default dict }}
 {{- range (.Values.connectors | sortAlpha) }}
-{{ . }}-configs.json: |
+s3-sink-{{ . }}-configs.json: |
   {{- $configFile := printf "config/%s.yaml" . }}
   {{- $configOverrides := get $overrides . | default dict }}
   {{- $configValues := include "recursiveLoad" (dict "filePath" $configFile "files" $files "content" $configOverrides) }}

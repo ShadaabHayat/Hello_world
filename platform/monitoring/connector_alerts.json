@@ -1,0 +1,464 @@
+{
+    "zta-mon-dashboards": [
+      {
+        "name": "endsystem_connector_alert",
+        "interval": "1m",
+        "rules": [
+          {
+            "expr": "",
+            "for": "2m",
+            "annotations": {
+              "summary": "end-system connector is down"
+            },
+            "grafana_alert": {
+              "id": 2,
+              "orgId": 1,
+              "title": "endsystem_connector_alert",
+              "condition": "B",
+              "data": [
+                {
+                  "refId": "A",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 600,
+                    "to": 0
+                  },
+                  "datasourceUid": "P1809F7CD0C75ACF3",
+                  "model": {
+                    "exemplar": false,
+                    "expr": "aicore_kafka_connect_connector_status{connector=\"debezium-connector-uz-endsystem\", status=\"failed\"}",
+                    "hide": false,
+                    "interval": "",
+                    "intervalMs": 1000,
+                    "legendFormat": "{{connector}}",
+                    "maxDataPoints": 43200,
+                    "refId": "A"
+                  }
+                },
+                {
+                  "refId": "B",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 0,
+                    "to": 0
+                  },
+                  "datasourceUid": "-100",
+                  "model": {
+                    "conditions": [
+                      {
+                        "evaluator": {
+                          "params": [
+                            0
+                          ],
+                          "type": "gt"
+                        },
+                        "operator": {
+                          "type": "and"
+                        },
+                        "query": {
+                          "params": [
+                            "A"
+                          ]
+                        },
+                        "reducer": {
+                          "params": [],
+                          "type": "count"
+                        },
+                        "type": "query"
+                      }
+                    ],
+                    "datasource": {
+                      "type": "__expr__",
+                      "uid": "-100"
+                    },
+                    "hide": false,
+                    "intervalMs": 1000,
+                    "maxDataPoints": 43200,
+                    "refId": "B",
+                    "type": "classic_conditions"
+                  }
+                }
+              ],
+              "updated": "2025-01-21T09:14:47Z",
+              "intervalSeconds": 60,
+              "version": 1,
+              "uid": "gfo1_VdHz",
+              "namespace_uid": "pg7hO4OHz",
+              "namespace_id": 1,
+              "rule_group": "endsystem_connector_alert",
+              "no_data_state": "NoData",
+              "exec_err_state": "Alerting"
+            }
+          }
+        ]
+      },
+      {
+        "name": "auth_debezium_connector_alert",
+        "interval": "1m",
+        "rules": [
+          {
+            "expr": "",
+            "for": "5m",
+            "annotations": {
+              "summary": "Auth connector is down"
+            },
+            "grafana_alert": {
+              "id": 3,
+              "orgId": 1,
+              "title": "auth_debezium_connector_alert",
+              "condition": "B",
+              "data": [
+                {
+                  "refId": "A",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 600,
+                    "to": 0
+                  },
+                  "datasourceUid": "P1809F7CD0C75ACF3",
+                  "model": {
+                    "exemplar": false,
+                    "expr": "aicore_kafka_connect_connector_status{connector=\"debezium-connector-auth\", status=\"failed\"}",
+                    "hide": false,
+                    "interval": "",
+                    "intervalMs": 1000,
+                    "legendFormat": "{{connector}}",
+                    "maxDataPoints": 43200,
+                    "refId": "A"
+                  }
+                },
+                {
+                  "refId": "B",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 0,
+                    "to": 0
+                  },
+                  "datasourceUid": "-100",
+                  "model": {
+                    "conditions": [
+                      {
+                        "evaluator": {
+                          "params": [
+                            0
+                          ],
+                          "type": "gt"
+                        },
+                        "operator": {
+                          "type": "and"
+                        },
+                        "query": {
+                          "params": [
+                            "A"
+                          ]
+                        },
+                        "reducer": {
+                          "params": [],
+                          "type": "count"
+                        },
+                        "type": "query"
+                      }
+                    ],
+                    "datasource": {
+                      "type": "__expr__",
+                      "uid": "-100"
+                    },
+                    "hide": false,
+                    "intervalMs": 1000,
+                    "maxDataPoints": 43200,
+                    "refId": "B",
+                    "type": "classic_conditions"
+                  }
+                }
+              ],
+              "updated": "2025-01-21T09:57:33Z",
+              "intervalSeconds": 60,
+              "version": 6,
+              "uid": "vymbX4dHz",
+              "namespace_uid": "pg7hO4OHz",
+              "namespace_id": 1,
+              "rule_group": "auth_debezium_connector_alert",
+              "no_data_state": "NoData",
+              "exec_err_state": "Alerting"
+            }
+          }
+        ]
+      },
+      {
+        "name": "sink_connector_alert",
+        "interval": "1m",
+        "rules": [
+          {
+            "expr": "",
+            "for": "5m",
+            "annotations": {
+              "summary": "Sink connector is down"
+            },
+            "grafana_alert": {
+              "id": 4,
+              "orgId": 1,
+              "title": "sink_connector_alert",
+              "condition": "B",
+              "data": [
+                {
+                  "refId": "A",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 600,
+                    "to": 0
+                  },
+                  "datasourceUid": "P1809F7CD0C75ACF3",
+                  "model": {
+                    "exemplar": false,
+                    "expr": "aicore_kafka_connect_connector_status{connector=\"s3-sink-connector\", status=\"failed\"}",
+                    "hide": false,
+                    "interval": "",
+                    "intervalMs": 1000,
+                    "legendFormat": "{{connector}}",
+                    "maxDataPoints": 43200,
+                    "refId": "A"
+                  }
+                },
+                {
+                  "refId": "B",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 0,
+                    "to": 0
+                  },
+                  "datasourceUid": "-100",
+                  "model": {
+                    "conditions": [
+                      {
+                        "evaluator": {
+                          "params": [
+                            -1
+                          ],
+                          "type": "gt"
+                        },
+                        "operator": {
+                          "type": "and"
+                        },
+                        "query": {
+                          "params": [
+                            "A"
+                          ]
+                        },
+                        "reducer": {
+                          "params": [],
+                          "type": "count"
+                        },
+                        "type": "query"
+                      }
+                    ],
+                    "datasource": {
+                      "type": "__expr__",
+                      "uid": "-100"
+                    },
+                    "hide": false,
+                    "intervalMs": 1000,
+                    "maxDataPoints": 43200,
+                    "refId": "B",
+                    "type": "classic_conditions"
+                  }
+                }
+              ],
+              "updated": "2025-01-21T10:30:18Z",
+              "intervalSeconds": 60,
+              "version": 2,
+              "uid": "MLpuqVONz",
+              "namespace_uid": "pg7hO4OHz",
+              "namespace_id": 1,
+              "rule_group": "sink_connector_alert",
+              "no_data_state": "NoData",
+              "exec_err_state": "Alerting"
+            }
+          }
+        ]
+      },
+      {
+        "name": "DLQ_Sink_connector_alert",
+        "interval": "1m",
+        "rules": [
+          {
+            "expr": "",
+            "for": "5m",
+            "annotations": {
+              "summary": "DLQ s3 sink connector down"
+            },
+            "grafana_alert": {
+              "id": 5,
+              "orgId": 1,
+              "title": "DLQ_Sink_connector_alert",
+              "condition": "B",
+              "data": [
+                {
+                  "refId": "A",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 600,
+                    "to": 0
+                  },
+                  "datasourceUid": "P1809F7CD0C75ACF3",
+                  "model": {
+                    "exemplar": false,
+                    "expr": "aicore_kafka_connect_connector_status{connector=\"s3-sink-connector-dlq\", status=\"failed\"}",
+                    "hide": false,
+                    "interval": "",
+                    "intervalMs": 1000,
+                    "legendFormat": "{{connector}}",
+                    "maxDataPoints": 43200,
+                    "refId": "A"
+                  }
+                },
+                {
+                  "refId": "B",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 0,
+                    "to": 0
+                  },
+                  "datasourceUid": "-100",
+                  "model": {
+                    "conditions": [
+                      {
+                        "evaluator": {
+                          "params": [
+                            0
+                          ],
+                          "type": "gt"
+                        },
+                        "operator": {
+                          "type": "and"
+                        },
+                        "query": {
+                          "params": [
+                            "A"
+                          ]
+                        },
+                        "reducer": {
+                          "params": [],
+                          "type": "count"
+                        },
+                        "type": "query"
+                      }
+                    ],
+                    "datasource": {
+                      "type": "__expr__",
+                      "uid": "-100"
+                    },
+                    "hide": false,
+                    "intervalMs": 1000,
+                    "maxDataPoints": 43200,
+                    "refId": "B",
+                    "type": "classic_conditions"
+                  }
+                }
+              ],
+              "updated": "2025-01-21T11:03:18Z",
+              "intervalSeconds": 60,
+              "version": 3,
+              "uid": "KZEBgIdHz",
+              "namespace_uid": "pg7hO4OHz",
+              "namespace_id": 1,
+              "rule_group": "DLQ_Sink_connector_alert",
+              "no_data_state": "NoData",
+              "exec_err_state": "Alerting"
+            }
+          }
+        ]
+      },
+      {
+        "name": "resource_connector_alert",
+        "interval": "1m",
+        "rules": [
+          {
+            "expr": "",
+            "for": "5m",
+            "annotations": {
+              "summary": "Resource connector is down"
+            },
+            "grafana_alert": {
+              "id": 1,
+              "orgId": 1,
+              "title": "resource_debezium_connector_alert",
+              "condition": "B",
+              "data": [
+                {
+                  "refId": "A",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 600,
+                    "to": 0
+                  },
+                  "datasourceUid": "P1809F7CD0C75ACF3",
+                  "model": {
+                    "exemplar": false,
+                    "expr": "aicore_kafka_connect_connector_status{connector=\"debezium-connector-resource\", status=\"failed\"}",
+                    "hide": false,
+                    "interval": "",
+                    "intervalMs": 1000,
+                    "legendFormat": "{{connector}}",
+                    "maxDataPoints": 43200,
+                    "refId": "A"
+                  }
+                },
+                {
+                  "refId": "B",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 0,
+                    "to": 0
+                  },
+                  "datasourceUid": "-100",
+                  "model": {
+                    "conditions": [
+                      {
+                        "evaluator": {
+                          "params": [
+                            0
+                          ],
+                          "type": "gt"
+                        },
+                        "operator": {
+                          "type": "and"
+                        },
+                        "query": {
+                          "params": [
+                            "A"
+                          ]
+                        },
+                        "reducer": {
+                          "params": [],
+                          "type": "count"
+                        },
+                        "type": "query"
+                      }
+                    ],
+                    "datasource": {
+                      "type": "__expr__",
+                      "uid": "-100"
+                    },
+                    "hide": false,
+                    "intervalMs": 1000,
+                    "maxDataPoints": 43200,
+                    "refId": "B",
+                    "type": "classic_conditions"
+                  }
+                }
+              ],
+              "updated": "2025-01-21T09:57:46Z",
+              "intervalSeconds": 60,
+              "version": 12,
+              "uid": "QdPC84OHk",
+              "namespace_uid": "pg7hO4OHz",
+              "namespace_id": 1,
+              "rule_group": "resource_connector_alert",
+              "no_data_state": "NoData",
+              "exec_err_state": "Alerting"
+            }
+          }
+        ]
+      }
+    ]
+  }

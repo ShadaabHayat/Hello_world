@@ -1,3 +1,7 @@
+/**
+ * This class contains the source code for Masking PII columns.
+ */
+
 package org.extremenetworks.com;
 
 import org.apache.commons.codec.digest.DigestUtils;

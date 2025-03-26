@@ -10,3 +10,4 @@ data:
   K6_VUS: {{ .Values.config.k6Vus | quote }}
   K6_DURATION: {{ .Values.config.k6Duration | quote }}
   PARTITIONS_COUNT_FOR_TOPIC: {{ .Values.config.partitionsCountForTopic | quote }}
+  SCHEMA_TYPE: {{ .Values.config.schemaType | quote }}

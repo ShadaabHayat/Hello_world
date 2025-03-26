@@ -32,3 +32,21 @@ spec:
         persistentVolumeClaim:
           claimName: {{ .Release.Name }}-reports-pvc
       {{- end }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - {{ .Values.scheduling.antiAffinityAppLabel }}
+              topologyKey: kubernetes.io/hostname
+      schedulerName: default-scheduler
+      topologySpreadConstraints:
+        - maxSkew: {{ .Values.scheduling.maxSkew }}
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: {{ .Values.scheduling.whenUnsatisfiable }}
+          labelSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-load-test

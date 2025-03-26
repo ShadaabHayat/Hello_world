@@ -1,24 +1,8 @@
 import { Writer, Connection, SchemaRegistry, SCHEMA_TYPE_AVRO } from 'k6/x/kafka';
 import { check } from 'k6';
+import { config } from './config.js';
 
-export const config = {
-    kafkaBrokers: __ENV.KAFKA_BROKERS || 'localhost:9092',
-    schemaRegistryUrl: __ENV.SCHEMA_REGISTRY_URL || 'http://localhost:8081/',
-    vus: parseInt(__ENV.K6_VUS || '2'),
-    duration: __ENV.K6_DURATION || '2s',
-    partitionsCountForTopic: parseInt(__ENV.PARTITIONS_COUNT_FOR_TOPIC || '4'),
-};
-
-export const options = {
-    vus: config.vus,
-    duration: config.duration,
-    thresholds: {
-        'checks': ['rate==1.0'],
-    },
-};
-
-
-export class KafkaProducer {
+export class KafkaAvroProducer {
     constructor(schema) {
         this.writer = new Writer({
             brokers: config.kafkaBrokers.split(','),

@@ -1,0 +1,9 @@
+requests==2.32.3
+s3fs==2025.2.0
+numpy<2
+pandas==2.2.3
+fastparquet==2023.4.0
+boto3==1.36.22
+pytest==8.3.4
+kafka-python==2.0.3
+avro==1.12.0

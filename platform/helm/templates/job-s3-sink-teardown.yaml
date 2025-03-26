@@ -1,0 +1,83 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-connector-teardown-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    checksum/config: {{ include (print .Template.BasePath "/configmap.yaml") . | sha256sum }}
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-connector-teardown-job
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-kafka-connect
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          command:
+            - sh
+            - -c
+            - |
+              yum install -y curl
+              for i in {1..60}; do
+                response=$(curl -s -w "\n%{http_code}" http://${KAFKA_CONNECT_URI}/connectors)
+                http_code=$(echo "$response" | tail -n1)
+                if [[ "$http_code" == "200" ]]; then
+                  echo "Kafka Connect is ready!"
+                  exit 0
+                fi
+                echo "Waiting for Kafka Connect..."
+                sleep 5
+              done
+              echo "Kafka Connect not available."
+              exit 1
+          env:
+            - name: KAFKA_CONNECT_URI
+              value: {{ .Values.kafkaConnectHost }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.kafkaConnectPort }}
+      containers:
+        - name: connector-teardown
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          env:
+            - name: KAFKA_CONNECT_URI
+              value: {{ .Values.kafkaConnectHost }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.kafkaConnectPort }}
+            - name: CONFIG_LIST
+              value: [{{- range $index, $connector := .Values.connectors }}
+                      {{- if $index }},{{ end }}"s3-sink-{{ $connector }}-connector"
+                      {{- end }}]
+          command:
+            - sh
+            - -c
+            - |
+              yum install -y curl jq
+              echo "Fetching current connectors list from Kafka..."
+              SERVICE_LIST=$(curl -s http://${KAFKA_CONNECT_URI}/connectors)
+
+              echo "Connectors expected: $CONFIG_LIST"
+              echo "Connectors found: $SERVICE_LIST"
+
+              # Make lists into arrays
+              SERVICE_ARR=($(echo $SERVICE_LIST | jq -r '.[]'))
+              CONFIG_ARR=($(echo $CONFIG_LIST | jq -r '.[]'))
+
+              for item in "${SERVICE_ARR[@]}"; do
+                  if [[ $item == s3-sink*-connector && ! " ${CONFIG_ARR[@]} " =~ " $item " ]]; then
+                      echo "Deleting $item from service..."
+                      curl -X DELETE "http://${KAFKA_CONNECT_URI}/connectors/$item"
+                  fi
+              done
+              echo "Unset Connectors teardown complete."
+
+      resources:
+        requests:
+          memory: {{ .Values.resources.requests.memory }}
+          cpu: {{ .Values.resources.requests.cpu }}
+        limits:
+          memory: {{ .Values.resources.limits.memory }}
+          cpu: {{ .Values.resources.limits.cpu }}
+---

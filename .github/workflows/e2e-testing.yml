@@ -1,108 +1,56 @@
-name: Ingestion Pipeline E2E Testing
+name: Ingestion Engine E2E Test
 
 on:
   workflow_dispatch:
-    inputs:
-      source:
-        description: "Source connector"
-        required: true
-        type: choice
-        options:
-          - 'Authentication'
-          - 'Resource'
-          - 'UZ End System'
-      sink:
-        description: "Sink connector"
-        required: true
-        type: choice
-        options:
-          - 'Main'
-          - 'DLQ'
-      rdc:
-        description: "RDC"
-        required: true
-        type: choice
-        options:
-          - 'feature-3'
-          - 'zta-qa'
-      env:
-        description: "Environment"
-        required: true
-        type: choice
-        options:
-          - 'feature'
-          - 'qa'
-
-defaults:
-  run:
-    shell: bash
-    working-directory: ./ingestion-engine/e2e-testing
-
-env:
-  SOURCE_CONNECTOR: ${{ inputs.source }}
-  SINK_CONNECTOR: ${{ inputs.sink }}
-  RDC: ${{ inputs.rdc }}
-  ENV: ${{ inputs.env }}
 
 jobs:
-  poetry:
-    name: Setup Poetry and install dependencies
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12", "3.13"]
-        poetry-version: ["1.8.4"]
-        os: ["ubuntu-latest"]
-    permissions:
-      id-token: write
-      contents: read
+  e2e-test:
+    name: E2E Test
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Minikube
+        uses: medyagh/setup-minikube@latest
         with:
-          python-version: ${{ matrix.python-version }}
+          cache: true
+          driver: podman
+          wait: false
+          cpus: 2
+          memory: 6144m
+          mount-path: "${{github.workspace}}/platform/test/e2e-testing:/e2e-code"
+          minikube-version: '1.35.0'
+          kubernetes-version: 'v1.32.0'
 
-      - name: Run poetry image
-        uses: abatilo/actions-poetry@v3
+      - name: Restore Kafka connect custom Image Cache if it exists
+        id: kafka-connect-image
+        uses: actions/cache@v3
         with:
-          poetry-version: ${{ matrix.poetry-version }}
+          path: /tmp/images/kafka-connect
+          key: kafka-connect-image-${{ hashFiles('**/resources/kafka-connect/Dockerfile') }}
 
-      - name: View poetry --help
-        run: poetry --help
+      - name: Build custom kafka connect docker image
+        if: steps.kafka-connect-image.outputs.cache-hit != 'true'
+        shell: bash
+        run: "platform/test/e2e-testing/scripts/build-kafka-connect.sh"
 
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
+      - name: Restore E2E test Image Cache if it exists
+        id: e2e-test-image
+        uses: actions/cache@v3
         with:
-          path: ./.venv
-          key: venv-${{ hashFiles('poetry.lock') }}
+          path: /tmp/images/e2e-test
+          key: e2e-test-image-${{ hashFiles('**/platform/test/e2e-testing/Dockerfile') }}
 
-      - name: Install the project dependencies
-        run: poetry install
+      - name: Build E2E Test docker image
+        if: steps.e2e-test-image.outputs.cache-hit != 'true'
+        shell: bash
+        run: "platform/test/e2e-testing/scripts/build-e2e-test-image.sh"
 
-  aws-login:
-    name: AWS Login
-    runs-on: ubuntu-latest
-    needs: poetry
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::438465127823:role/deployment-terraform-role
-          aws-region: us-east-1
+      - name: Deploy test components
+        shell: bash
+        run: "platform/test/e2e-testing/scripts/init-minikube.sh"
 
-  e2e-testing:
-    name: E2E Testing
-    runs-on: ubuntu-latest
-    needs: aws-login
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Run the E2E tests
-        run: poetry run python main.py
+      - name: Running tests
+        shell: bash
+        run: "platform/test/e2e-testing/scripts/run-e2e-test.sh"

@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: e2e-test
+  namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        app: e2e-test
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: e2e-test
+        image: localhost/python:e2e-test
+        imagePullPolicy: Never
+        command: ["python3"]
+        args: ["-u", "-m", "pytest", "-rA", "--show-capture", "stderr", "/code/main.py"]
+        env:
+          - name: PYTHONUNBUFFERED
+            value: '0'
+          - name: TEST_TABLE_NAME
+            value: "users"
+          - name: KAFKA_CONNECT_ENDPOINT
+            value: 'kafka-connect.default.svc.cluster.local:80'
+          - name: SCHEMA_REGISTRY_ENDPOINT
+            value: 'kafka-schema-registry.default.svc.cluster.local:80'
+          - name: MINIO_S3_ENDPOINT
+            value: 'minio.default.svc.cluster.local:80'
+          - name: KAFKA_UI_ENDPOINT
+            value: 'kafka-ui.default.svc.cluster.local:80'
+          - name: AWS_ACCESS_KEY_ID
+            value: "minioadmin"
+          - name: AWS_SECRET_ACCESS_KEY
+            value: "minioadmin"
+          - name: SINK_CONNECTOR_NAME
+            value: "s3-sink-connector"
+          - name: BOOTSTRAP_SERVERS
+            valueFrom:
+              configMapKeyRef:
+                name: kafka-cluster-bootstrap-servers
+                key: BOOTSTRAP_SERVERS
+        volumeMounts:
+         - name: e2e-test-code
+           mountPath: /code
+      volumes:
+        - name: e2e-test-code
+          hostPath:
+            path: "/e2e-code"

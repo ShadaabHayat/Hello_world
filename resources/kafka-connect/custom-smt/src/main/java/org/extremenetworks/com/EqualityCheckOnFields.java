@@ -1,3 +1,14 @@
+/**
+ * A Kafka Connect SMT (Single Message Transform) that applies equality and non-equality checks on specified fields.
+ * This transformation is configured using JSON-based field mappings, validating records against the provided rules.
+ * <p>
+ * If a record passes all the defined checks, it is allowed to proceed. Otherwise, the record will be sent to a
+ * dead-letter queue (DLQ).
+ * </p>
+ *
+ * @param <R> The type of {@link ConnectRecord} that this transformation processes.
+ */
+
 package org.extremenetworks.com;
 
 import static org.apache.kafka.connect.transforms.util.Requirements.requireMap;

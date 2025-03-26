@@ -12,8 +12,8 @@ env: {}
 # List of connectors to enable. The configuration for each connector will be
 # read from a file with the same name in the config folder.
 connectors:
-  - main
-  - dlq
+  - uz-table-data
+  - uz-table-data-dlq
 
 # Overrides allow modifying values in a connector's default configuration or defining a new connector.
 # Example:
@@ -21,7 +21,19 @@ connectors:
 #   anotherMain:
 #     inherit: "config/main.yaml"  # Inherit settings from an existing configuration file
 #     key: "value"  # Define custom values
-configOverrides: {}
+configOverrides:
+  uz-table-data:
+    inherit: "config/main.yaml"
+    errors.deadletterqueue.topic.name: "aicore-dlq"
+    tasks.max: "4"
+    topics: "aicore.public.resources_device,aicore.public.resources_devicegroup,aicore.public.users_user,aicore.public.access_groups_accessgroup,aicore.public.users_useraccessgroups,aicore.public.resources_service,aicore.public.resources_project,aicore.public.resources_projectservice,aicore.public.policies_policy,aicore.public.end_systems"
+    topics.dir: "warehouse"
+    transforms: "InsertRDCInfo, InsertEnvInfo, Mask_aicore_public_users_user, Mask_aicore_public_resources_device"
+  uz-table-data-dlq:
+    inherit: "config/dlq.yaml"
+    topics: "aicore-dlq"
+    topics.dir: "dlq"
+    transforms: "InsertRDCInfo, InsertEnvInfo, Mask_aicore_public_users_user, Mask_aicore_public_resources_device"
 
 kafkaConnectHost: aicore-kafka-connect
 kafkaConnectPort: 8083
@@ -34,17 +46,31 @@ resources:
     memory: "128Mi"
     cpu: "100m"
 
+cp-kafka-connect-enabled: true
+cp-schema-registry-enabled: false
 cp-kafka-connect:
   image: 081731760779.dkr.ecr.us-east-1.amazonaws.com/aicore/kafka-connect-custom
   imageTag: premain_285a23f
+  replicaCount: 3
   cp-schema-registry:
    url: "aicore-kafka-schema-registry:8081"
   kafka:
     bootstrapServers: "PLAINTEXT://common-kafka.common.svc.cluster.local:9092"
 
 cp-schema-registry:
-  enabled: false
   image: 081731760779.dkr.ecr.us-east-1.amazonaws.com/aicore/custom-images/confluentinc/cp-schema-registry
   imageTag: 7.7.1
   kafka:
     bootstrapServers: "PLAINTEXT://common-kafka.common.svc.cluster.local:9092"
+
+
+prometheusAlerts:
+  enabled: true
+  name: aicore-ingestion-engine-rules
+  groupName: aicore.rules
+  alerts:
+    s3SinkRecordThreshold: 1000
+    s3SinkRecordDuration: 5m
+    s3SinkRecordSeverity: warning
+    connectorStatusDuration: 5m
+    connectorStatusSeverity: critical

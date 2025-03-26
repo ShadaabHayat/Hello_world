@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: us-east-2
+  AWS_REGION: us-east-1
   ECR_REPOSITORY: k6-load-testing
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
       - name: Assume AWS Role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::567725467617:role/github-action-aws-access
+          role-to-assume: arn:aws:iam::438465127823:role/deployment-terraform-role
           role-duration-seconds: 7000
           aws-region: ${{ env.AWS_REGION }}
 
@@ -39,13 +39,10 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Create ECR repository if not exists
+      - name: Verify ECR repository existence
         run: |
           aws ecr describe-repositories --repository-names ${ECR_REPOSITORY} || \
-          aws ecr create-repository \
-            --repository-name ${ECR_REPOSITORY} \
-            --image-scanning-configuration scanOnPush=true \
-            --encryption-configuration encryptionType=AES256
+          { echo "ECR repository ${ECR_REPOSITORY} does not exist. Failing workflow."; exit 1; }
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -70,9 +67,3 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
-
-      - name: Generate Image Tag
-        id: image-tag
-        run: |
-          IMAGE_TAG="${{ github.ref_name }}_$(echo "${{ github.sha }}" | cut -c1-7)"
-          echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT

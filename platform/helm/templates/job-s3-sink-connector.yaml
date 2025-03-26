@@ -1,20 +1,15 @@
-{{- define "configmapHash" }}
-  {{- include "configmapYaml" . | toYaml | sha256sum | trunc 10 }}
-{{- end }}
-
-{{- define "jobYaml" }}
-{{- $root := .root }}
-{{- $connector := .connector }}
-{{- $configmapHash := include "configmapHash" $root }}
-{{- $jobName := printf "%s-connector-%s-job-%s" $root.Release.Name $connector .jobSuffix }}
----
+{{ $root := . }}
+{{ range $connector := $root.Values.connectors }}
+{{- printf "Creating job for connector: %s" $connector | indent 4 }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $jobName }}
+  name: {{ $root.Release.Name }}-connector-{{ $connector }}-job
   namespace: {{ $root.Release.Namespace }}
   annotations:
-    configmap.hash: "{{ $configmapHash }}"
+    checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") $root | sha256sum }}
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   completions: 1
   parallelism: 1
@@ -22,9 +17,11 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ $jobName }}
+        app: {{ $root.Release.Name }}-connector-{{ $connector }}-job
+
     spec:
       restartPolicy: Never
+
       initContainers:
         - name: wait-for-kafka-connect
           image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
@@ -32,16 +29,26 @@ spec:
             - sh
             - -c
             - |
-              echo "Kafka Connect is available."
+              yum install -y curl
+              for i in {1..60}; do
+                response=$(curl -s -w "\n%{http_code}" http://${KAFKA_CONNECT_URI}/connectors)
+                http_code=$(echo "$response" | tail -n1)
+                if [[ "$http_code" == "200" ]]; then
+                  echo "Kafka Connect is ready!"
+                  exit 0
+                fi
+                echo "Waiting for Kafka Connect..."
+                sleep 5
+              done
+              echo "Kafka Connect not available."
+              exit 1
           env:
             - name: KAFKA_CONNECT_URI
               value: {{ $root.Values.kafkaConnectHost }}.{{ $root.Release.Namespace }}.svc.cluster.local:{{ $root.Values.kafkaConnectPort }}
+
       containers:
         - name: {{ $connector }}-connector
           image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
-          envFrom:
-            - configMapRef:
-                name: {{ $root.Release.Name }}-envs
           env:
             - name: KAFKA_CONNECT_URI
               value: {{ $root.Values.kafkaConnectHost }}.{{ $root.Release.Namespace }}.svc.cluster.local:{{ $root.Values.kafkaConnectPort }}
@@ -51,19 +58,32 @@ spec:
             - sh
             - -c
             - |
+              yum install -y curl
+              echo "Configuring S3 Sink ${CONNECTOR_NAME} connector..."
+              curl -X PUT -H "Content-Type: application/json" http://${KAFKA_CONNECT_URI}/connectors/s3-sink-${CONNECTOR_NAME}-connector/config \
+              -d @/etc/s3-sink-${CONNECTOR_NAME}-configs.json
+              if [ $? -ne 0 ]; then
+                echo "Error: Failed to configure ${CONNECTOR_NAME} Connector." >&2
+                exit 1
+              fi
               echo "Kafka Connect ${CONNECTOR_NAME} Connector configuration complete."
-              sleep 8
+
           volumeMounts:
             - name: configmap
-              mountPath: /etc/config-s3-{{ $connector }}.json
-              subPath: {{ $connector }}-configs.json
+              mountPath: /etc/s3-sink-{{ $connector }}-configs.json
+              subPath: s3-sink-{{ $connector }}-configs.json
+
       volumes:
         - name: configmap
           configMap:
             name: {{ $root.Release.Name }}-connector-configs
-{{- end }}
 
-{{- range $connector := .Values.connectors }}
-{{- $jobSuffix := include "jobYaml" (dict "root" $ "connector" $connector "jobSuffix" "") | toYaml | sha256sum | trunc 10 }}
-{{- include "jobYaml" (dict "root" $ "connector" $connector "jobSuffix" $jobSuffix) }}
-{{- end }}
+      resources:
+        requests:
+          memory: {{ $root.Values.resources.requests.memory }}
+          cpu: {{ $root.Values.resources.requests.cpu }}
+        limits:
+          memory: {{ $root.Values.resources.limits.memory }}
+          cpu: {{ $root.Values.resources.limits.cpu }}
+---
+{{ end }}

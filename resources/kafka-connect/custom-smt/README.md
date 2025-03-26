@@ -31,11 +31,11 @@ A Kafka Connect transformation that validates records based on field equality an
 
 ```properties
 "transforms": "EqualityCheck,EqualityCheckUsers",
-"transforms.EqualityCheck.type": "org.extremenetworks.com.JsonConfigSMT",
+"transforms.EqualityCheck.type": "org.extremenetworks.com.EqualityCheckOnFields",
 "transforms.EqualityCheck.topic.name": "aicore.public.subs",
 "transforms.EqualityCheck.fields.Equality": "{\"last_modified_at\": [\"2024-12-03T12:00:00+00:00\", \"2024-12-09T18:00:00+00:00\", \"2024-12-06T15:00:00+00\"]}",
 "transforms.EqualityCheck.fields.notEquality": "{\"status\": [\"EXPIRED\"]}",
-"transforms.EqualityCheckUsers.type": "org.extremenetworks.com.JsonConfigSMT",
+"transforms.EqualityCheckUsers.type": "org.extremenetworks.com.EqualityCheckOnFields",
 "transforms.EqualityCheckUsers.topic.name": "aicore.public.users_user",
 "transforms.EqualityCheckUsers.fields.Equality": "{\"last_modified_at\": [\"2023-12-28T12:48:55.110673Z\", \"2023-09-22T11:45:35.448113Z\", \"2024-03-14T09:17:09.677411Z\", \"2024-07-15T11:12:30.611162Z\", \"2024-05-23T10:08:11.056928Z\"]}",
 "transforms.EqualityCheckUsers.fields.notEquality": "{\"status\": [\"EXPIRED\", \"PENDING\"]}",
