@@ -31,7 +31,7 @@ jobs:
       - name: Assume AWS Role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::438465127823:role/deployment-terraform-role
+          role-to-assume: arn:aws:iam::888507318922:role/deployment-terraform-role
           role-duration-seconds: 7000
           aws-region: ${{ env.AWS_REGION }}
 
