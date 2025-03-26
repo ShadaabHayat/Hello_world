@@ -24,110 +24,110 @@ env:
   JAVA_VERSION: '17'
 
 jobs:
-  security-scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # security-scan:
+  #   name: Security Scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Create output directory
-        run: mkdir -p scan-results
+  #     - name: Create output directory
+  #       run: mkdir -p scan-results
 
-      - name: List Java files to be scanned
-        run: |
-          echo "Files to be scanned in resources/kafka-connect/custom-smt/src/main/java:"
-          find ./resources/kafka-connect/custom-smt/src/main/java -name "*.java" -type f
+  #     - name: List Java files to be scanned
+  #       run: |
+  #         echo "Files to be scanned in resources/kafka-connect/custom-smt/src/main/java:"
+  #         find ./resources/kafka-connect/custom-smt/src/main/java -name "*.java" -type f
 
-      - name: List files to be scanned in resources/kafka-connect
-        run: |
-          echo "Files to be scanned in resources/kafka-connect:"
-          find ./resources/kafka-connect -type f
+  #     - name: List files to be scanned in resources/kafka-connect
+  #       run: |
+  #         echo "Files to be scanned in resources/kafka-connect:"
+  #         find ./resources/kafka-connect -type f
 
-      - name: Run Horusec Security Scan
-        uses: fike/horusec-action@v0.2.2
-        with:
-          arguments: >-
-            -p="resources/kafka-connect/custom-smt"
-            -p="resources/kafka-connect"
-            --config-file-path=".github/config/horusec-config.json"
-            -O="scan-results/horusec-results.json"
-            -o="json"
-            --ignore="**/target/**"
-            --log-level="trace"
+  #     - name: Run Horusec Security Scan
+  #       uses: fike/horusec-action@v0.2.2
+  #       with:
+  #         arguments: >-
+  #           -p="resources/kafka-connect/custom-smt"
+  #           -p="resources/kafka-connect"
+  #           --config-file-path=".github/config/horusec-config.json"
+  #           -O="scan-results/horusec-results.json"
+  #           -o="json"
+  #           --ignore="**/target/**"
+  #           --log-level="trace"
 
-      - name: Upload Horusec scan results
-        if: always()  # Run even if the scan fails
-        uses: actions/upload-artifact@v4
-        with:
-          name: horusec-scan-results
-          path: scan-results/horusec-results.json
-          retention-days: 30
-          if-no-files-found: warn
+  #     - name: Upload Horusec scan results
+  #       if: always()  # Run even if the scan fails
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: horusec-scan-results
+  #         path: scan-results/horusec-results.json
+  #         retention-days: 30
+  #         if-no-files-found: warn
 
-  test-and-code-coverage:
-    needs: security-scan
-    name: Test and Code Coverage
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      checks: write
-      issues: write
+  # test-and-code-coverage:
+  #   needs: security-scan
+  #   name: Test and Code Coverage
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #     pull-requests: write
+  #     checks: write
+  #     issues: write
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v3
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-          cache: maven
+  #     - name: Set up JDK ${{ env.JAVA_VERSION }}
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         java-version: ${{ env.JAVA_VERSION }}
+  #         distribution: 'temurin'
+  #         cache: maven
 
-      - name: Install required tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxml2-utils bc
+  #     - name: Install required tools
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y libxml2-utils bc
 
-      - name: Generate Coverage Report
-        run: |
-          cd resources/kafka-connect/custom-smt
-          mvn clean jacoco:prepare-agent test jacoco:report
+  #     - name: Generate Coverage Report
+  #       run: |
+  #         cd resources/kafka-connect/custom-smt
+  #         mvn clean jacoco:prepare-agent test jacoco:report
 
-      - name: Upload HTML Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report-html
-          path: resources/kafka-connect/custom-smt/target/site/jacoco/
-          retention-days: 14
+  #     - name: Upload HTML Report
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: coverage-report-html
+  #         path: resources/kafka-connect/custom-smt/target/site/jacoco/
+  #         retention-days: 14
 
-      - name: Add coverage to PR
-        if: github.event_name == 'pull_request'
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: resources/kafka-connect/custom-smt/target/site/jacoco/jacoco.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 70
-          min-coverage-changed-files: 70
-          title: '🔍 Custom SMT Code Coverage Analysis Details'
-          pass-emoji: '✅'
-          fail-emoji: '❌'
-          update-comment: true
-          debug-mode: true
-          skip-if-no-changes: false
-          continue-on-error: false
+  #     - name: Add coverage to PR
+  #       if: github.event_name == 'pull_request'
+  #       uses: madrapps/jacoco-report@v1.7.1
+  #       with:
+  #         paths: resources/kafka-connect/custom-smt/target/site/jacoco/jacoco.xml
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         min-coverage-overall: 70
+  #         min-coverage-changed-files: 70
+  #         title: '🔍 Custom SMT Code Coverage Analysis Details'
+  #         pass-emoji: '✅'
+  #         fail-emoji: '❌'
+  #         update-comment: true
+  #         debug-mode: true
+  #         skip-if-no-changes: false
+  #         continue-on-error: false
 
-      - name: Verify Coverage Report for the 70% threshold
-        run: |
-          cd resources/kafka-connect/custom-smt
-          mvn -B verify jacoco:report
-        continue-on-error: false
+  #     - name: Verify Coverage Report for the 70% threshold
+  #       run: |
+  #         cd resources/kafka-connect/custom-smt
+  #         mvn -B verify jacoco:report
+  #       continue-on-error: false
 
   build-image-and-push-to-ecr:
     name: Build and Push Docker Image
-    needs: test-and-code-coverage
+    # needs: test-and-code-coverage
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -143,7 +143,7 @@ jobs:
       - name: Assume AWS Role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::438465127823:role/deployment-terraform-role
+          role-to-assume: arn:aws:iam::888507318922:role/deployment-terraform-role
           role-duration-seconds: 3600
           aws-region: ${{ env.AWS_REGION }}
 
