@@ -81,11 +81,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Install required tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxml2-utils bc  
-
       - name: Generate Coverage Report
         run: |
           mvn clean jacoco:prepare-agent test jacoco:report
