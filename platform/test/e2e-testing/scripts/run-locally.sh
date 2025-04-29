@@ -8,6 +8,8 @@ minikube start \
     --mount --mount-string "$(pwd):/e2e-code" \
     --memory 9000MB
 
+source "scripts/custom-docker-cmd.source"
+
 bash "scripts/build-kafka-connect.sh"
 
 bash "scripts/build-e2e-test-image.sh"
@@ -15,5 +17,3 @@ bash "scripts/build-e2e-test-image.sh"
 bash "scripts/init-minikube.sh"
 
 bash "scripts/run-e2e-test.sh"
-
-minikube stop

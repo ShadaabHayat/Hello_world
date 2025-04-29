@@ -1,0 +1,23 @@
+[tool.poetry]
+name        = "dlq-consumer"
+version     = "0.1.0"
+description = "Kafka DLQ consumer with email alerts & Prometheus metrics"
+authors     = ["aabubakar@extremenetworks.com"]
+readme      = "readme.md"
+packages = [
+    { include = "src", from = "." }
+]
+
+[tool.poetry.dependencies]
+python            = "^3.9"
+kafka-python      = "^2.0.3"
+prometheus-client = "^0.16.0"
+PyYAML            = "^6.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest     = "^8.3.4"
+pytest-cov = "^4.0.0"
+
+[build-system]
+requires    = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

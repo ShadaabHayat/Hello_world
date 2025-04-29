@@ -19,6 +19,9 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.connector.ConnectRecord;
+import org.apache.kafka.connect.header.Headers;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
@@ -44,6 +48,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class EqualityCheckOnFields<R extends ConnectRecord<R>> implements Transformation<R> {
     private static final Logger LOG = LoggerFactory.getLogger(EqualityCheckOnFields.class);
     private static final String PURPOSE = "field validation";
+    private final Map<String, List<String>> failedChecks = new HashMap<>();
     private static final DateTimeFormatter[] TIMESTAMP_FORMATTERS = new DateTimeFormatter[] {
         DateTimeFormatter.ISO_ZONED_DATE_TIME,
         DateTimeFormatter.ISO_INSTANT,
@@ -97,13 +102,24 @@ public class EqualityCheckOnFields<R extends ConnectRecord<R>> implements Transf
         }
 
         if (allChecksPassed) {
-            return record;
+            return record; 
         } else {
-            LOG.warn("Record failed validation. Details: {}", record.toString());
-
-            return (R) record.newRecord(record.topic(), record.kafkaPartition(), record.keySchema(), record, null, null,
-                    System.currentTimeMillis());
-            //  send To DLQ
+            // Throw an exception to ensure the record goes to the DLQ and stops processing
+            // This will be caught by Kafka Connect's error handling mechanism
+            StringBuilder errorMsg = new StringBuilder("EqualityCheckOnFields_VALIDATION_FAILED: ");
+            
+            List<String> failedEqualityFields = failedChecks.getOrDefault("equalityFields", Collections.emptyList());
+            List<String> failedNotEqualityFields = failedChecks.getOrDefault("notEqualityFields", Collections.emptyList());
+            
+            if (!failedEqualityFields.isEmpty()) {
+                errorMsg.append("Failed equality checks for fields: ").append(failedEqualityFields).append(". ");
+            }
+            
+            if (!failedNotEqualityFields.isEmpty()) {
+                errorMsg.append("Failed non-equality checks for fields: ").append(failedNotEqualityFields).append(".");
+            }
+            
+            throw new DataException(errorMsg.toString());
         }
     }
      private boolean applyWithSchema(R record) {
@@ -121,6 +137,10 @@ public class EqualityCheckOnFields<R extends ConnectRecord<R>> implements Transf
     }
 
     private boolean checkConditions(Map<String, Object> record) {
+    // Lists to store failed fields for detailed error reporting
+    List<String> failedNotEqualityFields = new ArrayList<>();
+    List<String> failedEqualityFields = new ArrayList<>();
+    
     // Validate and perform "Not Equality" checks
     boolean notEqualityCheckPassed = true;
     if (!notEqualityConfig.isEmpty()) {
@@ -134,16 +154,18 @@ public class EqualityCheckOnFields<R extends ConnectRecord<R>> implements Transf
         }
 
         // Check that none of the values in the record match those in notEqualityConfig
-        notEqualityCheckPassed = notEqualityConfig.entrySet().stream()
-                .noneMatch(entry -> isValueInList(record.get(entry.getKey()), entry.getValue()));
-    }
-
-    if (!notEqualityCheckPassed) {
-        return false; // Record fails not-equality check
+        for (Map.Entry<String, List<?>> entry : notEqualityConfig.entrySet()) {
+            String fieldName = entry.getKey();
+            Object fieldValue = record.get(fieldName);
+            if (isValueInList(fieldValue, entry.getValue())) {
+                failedNotEqualityFields.add(fieldName + "=" + fieldValue);
+                notEqualityCheckPassed = false;
+            }
+        }
     }
 
     // Validate and perform "Equality" checks
-    boolean equalityCheckPassed = false;
+    boolean equalityCheckPassed = true; // Default to true if no equality configs
     if (!equalityConfig.isEmpty()) {
         Set<String> missingFields = equalityConfig.keySet().stream()
                 .filter(field -> !record.containsKey(field))
@@ -155,12 +177,23 @@ public class EqualityCheckOnFields<R extends ConnectRecord<R>> implements Transf
         }
 
         // Check that all values in the record match those in equalityConfig
-        equalityCheckPassed = equalityConfig.entrySet().stream()
-                .allMatch(entry -> isValueInList(record.get(entry.getKey()), entry.getValue()));
+        for (Map.Entry<String, List<?>> entry : equalityConfig.entrySet()) {
+            String fieldName = entry.getKey();
+            Object fieldValue = record.get(fieldName);
+            if (!isValueInList(fieldValue, entry.getValue())) {
+                failedEqualityFields.add(fieldName + "=" + fieldValue);
+                equalityCheckPassed = false;
+            }
+        }
     }
 
-    // If there are no equality checks defined, consider it a pass as long as not-equality checks passed
-    return equalityCheckPassed || equalityConfig.isEmpty();
+    // Store the failed fields for error reporting
+    if (!equalityCheckPassed || !notEqualityCheckPassed) {
+        failedChecks.put("equalityFields", failedEqualityFields);
+        failedChecks.put("notEqualityFields", failedNotEqualityFields);
+    }
+
+    return equalityCheckPassed && notEqualityCheckPassed;
 }
 
 private boolean isValueInList(Object fieldValue, List<?> checkValues) {

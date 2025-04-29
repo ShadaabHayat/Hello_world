@@ -1,0 +1,91 @@
+startDelaySeconds: 30
+hostPort: connect:5555
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+ssl: false
+blacklistObjectNames: []
+rules:
+  - pattern: "kafka.connect<type=connect-worker-metrics>([^:]+)"
+    name: aicore_kafka_connect_worker_$1
+    type: GAUGE
+    labels: {}
+
+  - pattern: "kafka.connect<type=connect-metrics, client-id=([^:]+)><>([^:]+)"
+    name: aicore_kafka_connect_metrics_$2
+    type: GAUGE
+    labels:
+      client: "$1"
+
+  - pattern: "kafka.connect<type=connector-task-metrics, connector=([^:]+), task=([^:]+)><>status: ([^:]+)"
+    name: aicore_kafka_connect_connector_status
+    type: GAUGE
+    value: 1
+    labels:
+      connector: "$1"
+      task: "$2"
+      status: "$3"
+
+  - pattern: "kafka.connect<type=connector-metrics, connector=([^:]+)><>([^:]+)"
+    name: aicore_kafka_connect_connector_$2
+    type: GAUGE
+    labels:
+      connector: "$1"
+      name: "$1"
+
+  - pattern: "kafka.connect<type=connector-task-metrics, connector=([^:]+), task=([^:]+)><>([^:]+)"
+    name: aicore_kafka_connect_task_$3
+    type: GAUGE
+    labels:
+      connector: "$1"
+      task: "$2"
+      name: "$1"
+
+  - pattern: "kafka.connect<type=sink-task-metrics, connector=([^:]+), task=([^:]+)><>([^:]+)"
+    name: aicore_s3_sink_$3
+    type: GAUGE
+    labels:
+      connector: "$1"
+      task: "$2"
+      connector_name: "$1"
+
+  - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)-total"
+    name: aicore_kafka_connect_task_error_$3_total
+    type: COUNTER
+    labels:
+      connector: "$1"
+      task: "$2"
+
+  - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)-count"
+    name: aicore_kafka_connect_task_error_$3_count
+    type: GAUGE
+    labels:
+      connector: "$1"
+      task: "$2"
+
+  - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)-rate"
+    name: aicore_kafka_connect_task_error_$3_rate
+    type: GAUGE
+    labels:
+      connector: "$1"
+      task: "$2"
+
+  - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)-avg"
+    name: aicore_kafka_connect_task_error_$3_avg
+    type: GAUGE
+    labels:
+      connector: "$1"
+      task: "$2"
+
+  - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)-max"
+    name: aicore_kafka_connect_task_error_$3_max
+    type: GAUGE
+    labels:
+      connector: "$1"
+      task: "$2"
+
+  - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)"
+    name: aicore_kafka_connect_task_error_$3
+    type: GAUGE
+    labels:
+      connector: "$1"
+      task: "$2"

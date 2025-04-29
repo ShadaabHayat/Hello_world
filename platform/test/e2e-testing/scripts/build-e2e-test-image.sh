@@ -12,6 +12,8 @@ fi
 
 E2E_TEST_IMAGE="localhost/python:e2e-test"
 
+source "scripts/custom-docker-cmd.source"
+
 cd "$DIR/platform/test/e2e-testing"
 docker build -t "$E2E_TEST_IMAGE" .
 

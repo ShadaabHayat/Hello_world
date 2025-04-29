@@ -1,0 +1,258 @@
+{
+	"type": "record",
+	"name": "Device",
+	"fields": [
+		{
+			"name": "id",
+			"type": "string"
+		},
+		{
+			"name": "created_at",
+			"type": "string"
+		},
+		{
+			"name": "last_modified_at",
+			"type": "string"
+		},
+		{
+			"name": "last_connected_location",
+			"type": "string"
+		},
+		{
+			"name": "last_connected",
+			"type": "long"
+		},
+		{
+			"name": "public_access_key",
+			"type": "string"
+		},
+		{
+			"name": "created_by_id",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "workspace_id",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "platform_os",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "is_notification_enabled",
+			"type": "boolean"
+		},
+		{
+			"name": "device_notification_token",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "unique_identifier",
+			"type": "string"
+		},
+		{
+			"name": "access_mode",
+			"type": "string"
+		},
+		{
+			"name": "device_access_revoked",
+			"type": "boolean"
+		},
+		{
+			"name": "device_type",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "os_version",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "last_login_user",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "last_login_at",
+			"type": [
+				"null",
+				"long"
+			],
+			"default": null
+		},
+		{
+			"name": "user_last_login_at",
+			"type": [
+				"null",
+				"long"
+			],
+			"default": null
+		},
+		{
+			"name": "preshared_key",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "private_key",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "dns_status",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "private_ip",
+			"type": "string"
+		},
+		{
+			"name": "public_ip",
+			"type": "string"
+		},
+		{
+			"name": "auth_request",
+			"type": "string"
+		},
+		{
+			"name": "compliance",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "is_craas",
+			"type": "boolean"
+		},
+		{
+			"name": "is_zta",
+			"type": "boolean"
+		},
+		{
+			"name": "mac_address",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "mac_oui",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "ipv6_address",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "mdm_id",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "raw_mac_address",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "is_guest",
+			"type": "boolean"
+		},
+		{
+			"name": "model_serial_number",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "created_by_email",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "license_type",
+			"type": "string"
+		},
+		{
+			"name": "alias",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "description",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "is_posture_valid",
+			"type": "boolean"
+		},
+		{
+			"name": "connected",
+			"type": "boolean"
+		}
+	]
+}

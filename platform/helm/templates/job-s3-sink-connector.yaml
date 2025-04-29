@@ -49,6 +49,9 @@ spec:
       containers:
         - name: {{ $connector }}-connector
           image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
+          envFrom:
+            - configMapRef:
+                name: {{ $root.Release.Name }}-envs
           env:
             - name: KAFKA_CONNECT_URI
               value: {{ $root.Values.kafkaConnectHost }}.{{ $root.Release.Namespace }}.svc.cluster.local:{{ $root.Values.kafkaConnectPort }}
@@ -59,11 +62,14 @@ spec:
             - -c
             - |
               yum install -y curl
+              yum install -y gettext
+              ESCAPE_CHAR='$' envsubst < /etc/s3-sink-${CONNECTOR_NAME}-configs.json > /tmp/s3-sink-${CONNECTOR_NAME}-configs.json
               echo "Configuring S3 Sink ${CONNECTOR_NAME} connector..."
-              curl -X PUT -H "Content-Type: application/json" http://${KAFKA_CONNECT_URI}/connectors/s3-sink-${CONNECTOR_NAME}-connector/config \
-              -d @/etc/s3-sink-${CONNECTOR_NAME}-configs.json
-              if [ $? -ne 0 ]; then
-                echo "Error: Failed to configure ${CONNECTOR_NAME} Connector." >&2
+              response=$(curl -s -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" http://${KAFKA_CONNECT_URI}/connectors/s3-sink-${CONNECTOR_NAME}-connector/config \
+              -d @/tmp/s3-sink-${CONNECTOR_NAME}-configs.json)
+              http_code=$(echo "$response" | tail -n1)
+              if [[ "$http_code" != "200" && "$http_code" != "201" ]]; then
+                echo "Error: Failed to configure ${CONNECTOR_NAME} Connector. HTTP RESPONSE: $response" >&2
                 exit 1
               fi
               echo "Kafka Connect ${CONNECTOR_NAME} Connector configuration complete."

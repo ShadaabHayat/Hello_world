@@ -1,0 +1,5 @@
+kafka-python==2.0.3
+prometheus-client==0.16.0
+pytest==8.3.4
+pytest-cov==4.0.0
+PyYAML

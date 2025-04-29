@@ -5,19 +5,21 @@ import pytest
 
 import reader
 import params
-from test_template import assertion_template
+from test_template import assertion_template, get_nested_values
 
 
 def assert_data_quality_check(df, included_field: str, included_values_list: list[str], excluded_field: str, excluded_values_list: list[str]):
-    for _, row in df.iterrows():
-        included_field_value = row[included_field]
-        excluded_field_value = row[excluded_field]
+    for row in df.iter_rows(named=True):
 
-        assert included_field_value     in included_values_list, \
-            f"Did not expect to find <{included_field}={included_field_value}>, allowed values are <{included_values_list}>"
+        included_field_values = get_nested_values(row, included_field)
+        excluded_field_values = get_nested_values(row, excluded_field)
 
-        assert excluded_field_value not in excluded_values_list, \
-            f"Did not expect to find <{excluded_field}={excluded_field_value}>, filtered out values are <{excluded_values_list}>"
+        for included_field_value, excluded_field_value in zip(included_field_values, excluded_field_values):
+            assert included_field_value     in included_values_list, \
+                f"Did not expect to find <{included_field}={included_field_value}>, allowed values are <{included_values_list}>"
+
+            assert excluded_field_value not in excluded_values_list, \
+                f"Did not expect to find <{excluded_field}={excluded_field_value}>, filtered out values are <{excluded_values_list}>"
 
 
 def test_smt_EqualityCheckOnFields():
@@ -25,7 +27,7 @@ def test_smt_EqualityCheckOnFields():
     expected_record_count = 13
     expected_dlq_record_count = record_count - expected_record_count
 
-    expected_fields = ["id", "num1", "str1", "ssn", "nest1.str2", "nest1.str3", "nest1.arr1", "rdc", "env", "last_modified_at", "__op", "__ts_ms", "__deleted"]
+    expected_fields = ["id", "num1", "str1", "ssn", "nest1", "rdc", "env", "last_modified_at", "__op", "__ts_ms", "__deleted"]
 
     included_field = "str1"
     get_included_value = lambda i: "abc-" + str(i)

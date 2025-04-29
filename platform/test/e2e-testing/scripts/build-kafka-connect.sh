@@ -12,6 +12,8 @@ fi
 
 KAFKA_CONNECT_IMAGE="localhost/s3-custom-image:e2e-test"
 
+source "scripts/custom-docker-cmd.source"
+
 cd "$DIR/resources/kafka-connect"
 docker build -t "$KAFKA_CONNECT_IMAGE" .
 

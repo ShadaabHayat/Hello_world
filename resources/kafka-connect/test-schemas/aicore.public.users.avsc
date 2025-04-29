@@ -1,0 +1,76 @@
+{
+	"type": "record",
+	"name": "Value",
+	"namespace": "aicore.public.users",
+	"fields": [
+		{
+			"name": "id",
+			"type": ["null", "int"],
+			"default": null
+		},
+		{
+			"name": "num1",
+			"type": ["null", "int"],
+			"default": null
+		},
+		{
+			"name": "nest1",
+			"type": [
+				{
+					"type": "record",
+					"name": "dummy",
+					"fields": [
+						{
+							"name": "str2",
+							"type": ["null", "string"],
+							"default": null
+						},
+						{
+							"name": "arr1",
+							"type": {
+								"type": "array",
+								"items": {
+									"type": "record",
+									"name": "ArrayItem",
+									"fields": [
+										{
+											"name": "username",
+											"type": ["null", "string"],
+											"default": null
+										}
+									]
+								}
+							},
+							"default": []	
+						}
+					]
+				},
+				"null"
+			]
+		},
+		{
+			"name": "__op",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		},
+		{
+			"name": "__ts_ms",
+			"type": [
+				"null",
+				"long"
+			],
+			"default": null
+		},
+		{
+			"name": "__deleted",
+			"type": [
+				"null",
+				"string"
+			],
+			"default": null
+		}
+	]
+}

@@ -1,0 +1,160 @@
+{
+  "type": "record",
+  "name": "ComplexRecord",
+  "namespace": "org.extremenetworks.com.test",
+  "doc": "A complex record with various field types and nested structures",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique identifier"
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "Event timestamp in milliseconds"
+    },
+    {
+      "name": "nullable_field",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "A field that can be null"
+    },
+    {
+      "name": "multi_type_field",
+      "type": ["null", "string", "int"],
+      "default": null,
+      "doc": "A field that can be multiple types"
+    },
+    {
+      "name": "enum_field",
+      "type": {
+        "type": "enum",
+        "name": "StatusEnum",
+        "symbols": ["ACTIVE", "INACTIVE", "PENDING"]
+      },
+      "doc": "Status enumeration"
+    },
+    {
+      "name": "fixed_field",
+      "type": {
+        "type": "fixed",
+        "name": "FixedSixteen",
+        "size": 16
+      },
+      "doc": "Fixed-size binary data"
+    },
+    {
+      "name": "array_of_primitives",
+      "type": {
+        "type": "array",
+        "items": "string"
+      },
+      "doc": "Array of primitive types"
+    },
+    {
+      "name": "array_of_records",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "ChildRecord",
+          "fields": [
+            {"name": "child_id", "type": "string"},
+            {"name": "child_value", "type": "int"}
+          ]
+        }
+      },
+      "doc": "Array of nested records"
+    },
+    {
+      "name": "map_field",
+      "type": {
+        "type": "map",
+        "values": "string"
+      },
+      "doc": "Map with string values"
+    },
+    {
+      "name": "complex_map_field",
+      "type": {
+        "type": "map",
+        "values": {
+          "type": "record",
+          "name": "MapValue",
+          "fields": [
+            {"name": "value_id", "type": "string"},
+            {"name": "value_count", "type": "int"}
+          ]
+        }
+      },
+      "doc": "Map with complex values"
+    },
+    {
+      "name": "deeply_nested_record",
+      "type": {
+        "type": "record",
+        "name": "Level1",
+        "fields": [
+          {"name": "level1_id", "type": "string"},
+          {
+            "name": "level2",
+            "type": {
+              "type": "record",
+              "name": "Level2",
+              "fields": [
+                {"name": "level2_id", "type": "string"},
+                {
+                  "name": "level3",
+                  "type": {
+                    "type": "record",
+                    "name": "Level3",
+                    "fields": [
+                      {"name": "level3_id", "type": "string"},
+                      {"name": "level3_value", "type": "double"}
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "doc": "A deeply nested record structure"
+    },
+    {
+      "name": "union_with_record",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "UnionRecord",
+          "fields": [
+            {"name": "union_id", "type": "string"},
+            {"name": "union_value", "type": "double"}
+          ]
+        }
+      ],
+      "default": null,
+      "doc": "A union type that includes a record"
+    },
+    {
+      "name": "recursive_reference",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "NodeRecord",
+          "fields": [
+            {"name": "node_id", "type": "string"},
+            {"name": "node_value", "type": "string"},
+            {"name": "next_node", "type": ["null", "NodeRecord"], "default": null}
+          ]
+        }
+      ],
+      "default": null,
+      "doc": "A recursive reference to create linked structures"
+    }
+  ]
+}

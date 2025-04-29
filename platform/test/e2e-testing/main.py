@@ -1,5 +1,6 @@
 
 import pytest
+import time
 
 from tests import *
 

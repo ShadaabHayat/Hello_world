@@ -1,0 +1,207 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ComplexRecord",
+  "description": "A complex record with various field types and nested structures",
+  "type": "object",
+  "required": ["id", "timestamp", "enum_field"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier"
+    },
+    "timestamp": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Event timestamp in milliseconds"
+    },
+    "nullable_field": {
+      "type": ["null", "string"],
+      "description": "A field that can be null"
+    },
+    "multi_type_field": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string" },
+        { "type": "integer" }
+      ],
+      "description": "A field that can be multiple types"
+    },
+    "enum_field": {
+      "type": "string",
+      "enum": ["ACTIVE", "INACTIVE", "PENDING"],
+      "description": "Status enumeration"
+    },
+    "fixed_field": {
+      "type": "string",
+      "format": "byte",
+      "description": "Fixed-size binary data"
+    },
+    "array_of_primitives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of primitive types"
+    },
+    "array_of_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "child_id": { "type": "string" },
+          "child_value": { "type": "integer" }
+        },
+        "required": ["child_id", "child_value"]
+      },
+      "description": "Array of nested records"
+    },
+    "map_field": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Map with string values"
+    },
+    "complex_map_field": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "value_id": { "type": "string" },
+          "value_count": { "type": "integer" }
+        },
+        "required": ["value_id", "value_count"]
+      },
+      "description": "Map with complex values"
+    },
+    "deeply_nested_record": {
+      "type": "object",
+      "properties": {
+        "level1_id": { "type": "string" },
+        "level2": {
+          "type": "object",
+          "properties": {
+            "level2_id": { "type": "string" },
+            "level3": {
+              "type": "object",
+              "properties": {
+                "level3_id": { "type": "string" },
+                "level3_value": { "type": "number" }
+              },
+              "required": ["level3_id", "level3_value"]
+            }
+          },
+          "required": ["level2_id", "level3"]
+        }
+      },
+      "required": ["level1_id", "level2"],
+      "description": "A deeply nested record structure"
+    },
+    "polymorphic_field": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": { "enum": ["type_a"] },
+            "a_value": { "type": "string" }
+          },
+          "required": ["type", "a_value"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "enum": ["type_b"] },
+            "b_value": { "type": "integer" }
+          },
+          "required": ["type", "b_value"]
+        }
+      ],
+      "description": "A polymorphic field that can be one of multiple types"
+    },
+    "allOf_example": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "base_id": { "type": "string" }
+          },
+          "required": ["base_id"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "extension_id": { "type": "string" }
+          },
+          "required": ["extension_id"]
+        }
+      ],
+      "description": "A field that combines multiple schema definitions"
+    },
+    "anyOf_example": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "option_a": { "type": "string" }
+          },
+          "required": ["option_a"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "option_b": { "type": "integer" }
+          },
+          "required": ["option_b"]
+        }
+      ],
+      "description": "A field that can satisfy any of multiple schema definitions"
+    },
+    "with_references": {
+      "type": "object",
+      "properties": {
+        "ref_id": { "type": "string" },
+        "ref_value": { "$ref": "#/definitions/common_value" }
+      },
+      "required": ["ref_id"],
+      "description": "A field with schema references"
+    },
+    "conditional_field": {
+      "type": "object",
+      "properties": {
+        "condition_type": { "type": "string", "enum": ["type1", "type2"] },
+        "type1_value": { "type": "string" },
+        "type2_value": { "type": "integer" }
+      },
+      "required": ["condition_type"],
+      "allOf": [
+        {
+          "if": {
+            "properties": { "condition_type": { "enum": ["type1"] } }
+          },
+          "then": {
+            "required": ["type1_value"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "condition_type": { "enum": ["type2"] } }
+          },
+          "then": {
+            "required": ["type2_value"]
+          }
+        }
+      ],
+      "description": "A field with conditional validation"
+    }
+  },
+  "definitions": {
+    "common_value": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "value": { "type": "number" }
+      },
+      "required": ["name", "value"]
+    }
+  }
+}

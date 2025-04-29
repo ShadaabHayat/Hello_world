@@ -12,10 +12,15 @@ services:
       SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       RESOURCE_DEVICE_TOPIC_NAME: "aicore-resource-device"
       USER_TOPIC_NAME: "aicore-users-topic"
+      NETWORK_DEVICE_TOPIC_NAME: "aicore-network-device"
+      PRODUCE_RESOURCE_DEVICE: "true"
+      PRODUCE_USER: "true"
+      PRODUCE_NETWORK_DEVICE: "true"
       K6_VUS: "100"
       K6_DURATION: "2s"
       PARTITIONS_COUNT_FOR_TOPIC: "4"
       SCHEMA_TYPE: "avro"
+
 networks:
   default:
     external:

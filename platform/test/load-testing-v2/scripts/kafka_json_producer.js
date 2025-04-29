@@ -67,36 +67,7 @@ export class KafkaJsonProducer {
 
         // Map Avro fields to JSON schema properties
         for (const field of avroSchemaObj.fields) {
-            // Handle union types (e.g., ["null", "string"])
-            if (Array.isArray(field.type)) {
-                // If the field can be null, we need to handle it specially in JSON Schema
-                if (field.type.includes("null")) {
-                    // Get all non-null types
-                    const nonNullTypes = field.type.filter(t => t !== "null");
-
-                    if (nonNullTypes.length === 1) {
-                        // If there's only one non-null type, use it with nullable: true
-                        jsonSchema.properties[field.name] = {
-                            type: [this.mapAvroTypeToJsonType(nonNullTypes[0]), "null"]
-                        };
-                    } else {
-                        // For multiple types including null
-                        jsonSchema.properties[field.name] = {
-                            type: [...nonNullTypes.map(t => this.mapAvroTypeToJsonType(t)), "null"]
-                        };
-                    }
-                } else {
-                    // For union types that don't include null
-                    jsonSchema.properties[field.name] = {
-                        type: field.type.map(t => this.mapAvroTypeToJsonType(t))
-                    };
-                }
-            } else {
-                // For simple types
-                jsonSchema.properties[field.name] = {
-                    type: this.mapAvroTypeToJsonType(field.type)
-                };
-            }
+            jsonSchema.properties[field.name] = this.processAvroField(field);
 
             // Add description if available
             if (field.doc) {
@@ -105,6 +76,101 @@ export class KafkaJsonProducer {
         }
 
         return JSON.stringify(jsonSchema);
+    }
+
+    // Process a single Avro field and convert it to JSON schema property
+    processAvroField(field) {
+        // Handle union types (e.g., ["null", "string"])
+        if (Array.isArray(field.type)) {
+            // If the field can be null, we need to handle it specially in JSON Schema
+            if (field.type.includes("null")) {
+                // Get all non-null types
+                const nonNullTypes = field.type.filter(t => t !== "null");
+
+                if (nonNullTypes.length === 1) {
+                    // If there's only one non-null type, use it with nullable: true
+                    return {
+                        type: [this.processAvroType(nonNullTypes[0]).type, "null"]
+                    };
+                } else {
+                    // For multiple types including null
+                    return {
+                        type: [...nonNullTypes.map(t => this.processAvroType(t).type), "null"]
+                    };
+                }
+            } else {
+                // For union types that don't include null
+                return {
+                    type: field.type.map(t => this.processAvroType(t).type)
+                };
+            }
+        } else {
+            // For simple types or complex types
+            return this.processAvroType(field.type);
+        }
+    }
+
+    // Process Avro type (which could be a string or an object)
+    processAvroType(avroType) {
+        // If it's a string, map it to JSON schema type
+        if (typeof avroType === 'string') {
+            const typeMapping = {
+                'string': 'string',
+                'int': 'integer',
+                'long': 'integer',
+                'float': 'number',
+                'double': 'number',
+                'boolean': 'boolean',
+                'bytes': 'string',
+                'null': 'null'
+            };
+            return { type: typeMapping[avroType] || 'string' };
+        }
+
+        // If it's an object, it's a complex type
+        if (typeof avroType === 'object') {
+            // Handle record type (nested object)
+            if (avroType.type === 'record') {
+                const properties = {};
+
+                // Process each field in the record
+                for (const field of avroType.fields) {
+                    properties[field.name] = this.processAvroField(field);
+                }
+
+                return {
+                    type: 'object',
+                    properties: properties
+                };
+            }
+
+            // Handle array type
+            if (avroType.type === 'array') {
+                return {
+                    type: 'array',
+                    items: this.processAvroType(avroType.items)
+                };
+            }
+
+            // Handle map type
+            if (avroType.type === 'map') {
+                return {
+                    type: 'object',
+                    additionalProperties: this.processAvroType(avroType.values)
+                };
+            }
+
+            // Handle enum type
+            if (avroType.type === 'enum') {
+                return {
+                    type: 'string',
+                    enum: avroType.symbols
+                };
+            }
+        }
+
+        // Default to string for unknown types
+        return { type: 'string' };
     }
 
     // Helper function to map Avro types to JSON schema types

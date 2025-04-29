@@ -46,15 +46,13 @@ spec:
           env:
             - name: KAFKA_CONNECT_URI
               value: {{ .Values.kafkaConnectHost }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.kafkaConnectPort }}
-            - name: CONFIG_LIST
-              value: [{{- range $index, $connector := .Values.connectors }}
-                      {{- if $index }},{{ end }}"s3-sink-{{ $connector }}-connector"
-                      {{- end }}]
           command:
             - sh
             - -c
             - |
               yum install -y curl jq
+              echo "Composing list of connectors"
+              CONFIG_LIST=$(cd /connectors && ls *.json | sed 's/\-configs.json$/-connector/' | jq -R . | jq -s .)
               echo "Fetching current connectors list from Kafka..."
               SERVICE_LIST=$(curl -s http://${KAFKA_CONNECT_URI}/connectors)
 
@@ -72,7 +70,13 @@ spec:
                   fi
               done
               echo "Unset Connectors teardown complete."
-
+          volumeMounts:
+            - name: configmap
+              mountPath: /connectors
+      volumes:
+        - name: configmap
+          configMap:
+            name: {{ .Release.Name }}-connector-configs
       resources:
         requests:
           memory: {{ .Values.resources.requests.memory }}

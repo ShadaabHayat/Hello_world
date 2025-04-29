@@ -16,9 +16,7 @@ minikube image load "$E2E_TEST_SAVE_DIR/e2e-image.tar"
 cd "$DIR/platform/test/e2e-testing"
 
 kubectl apply -f minikube/e2e-test-code.yaml
-kubectl wait --for=condition=Available=True pod -l app=e2e-test  --timeout=30s
-
-kubectl get pods -A
+kubectl wait --for=condition=Ready=True pod -l app=e2e-test  --timeout=10s
 kubectl logs -l app=e2e-test -f
 
 while true; do {

@@ -6,8 +6,16 @@ replicaCount: 3
 
 ## Image Info
 ## ref: https://hub.docker.com/r/confluentinc/cp-kafka/
-image: 081731760779.dkr.ecr.us-east-1.amazonaws.com/aicore/kafka-connect-custom
+image: 438465127823.dkr.ecr.us-east-1.amazonaws.com/aicore-ingestion-engine/kafka-connect-custom
 imageTag: premain_285a23f
+
+## Init Image Info
+init:
+  enabled: false
+  image:
+  imageTag: latest
+  imagePullPolicy: Always
+  volumeMounts:
 
 ## Specify a imagePullPolicy
 ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -30,9 +38,6 @@ configurationOverrides:
   "value.converter.schemas.enable": "false"
   "internal.key.converter": "org.apache.kafka.connect.storage.StringConverter"
   "internal.value.converter": "io.confluent.connect.avro.AvroConverter"
-  "offset.storage.topic": "aicore-kafka-connect-cluster-offsets"
-  "config.storage.topic": "aicore-kafka-connect-cluster-configs"
-  "status.storage.topic": "aicore-kafka-connect-cluster-status"
   "config.storage.replication.factor": "1"
   "offset.storage.replication.factor": "1"
   "status.storage.replication.factor": "1"

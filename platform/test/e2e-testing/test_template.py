@@ -7,7 +7,7 @@ import producer
 import kafka_connect
 import reader
 
-import pandas as pd
+import polars as pl
 
 global_wait_time = 10
 
@@ -15,7 +15,7 @@ def run_test_for_records(
     records: list[dict],
     override_sink_config: dict={}, wait_time: float=global_wait_time, create_dlq: bool=False,
     should_create_topic: bool=True, should_publish_schema: bool=True,
-    value_format: str="AVRO") -> (list[pd.DataFrame], list[str]):
+    value_format: str="AVRO") -> (list[pl.DataFrame], list[str]):
 
     cleanup.delete_all()
 
@@ -40,7 +40,7 @@ def run_test_for_ids(
     ids: range | list[int], op: str,
     override_sink_config: dict={}, wait_time: float=global_wait_time, create_dlq: bool=False,
     should_create_topic: bool=True, should_publish_schema: bool=True,
-    value_format: str="AVRO") -> (list[pd.DataFrame], list[str]):
+    value_format: str="AVRO") -> (list[pl.DataFrame], list[str]):
 
     records = []
     for record_id in ids:
@@ -77,7 +77,12 @@ def assertion_template_for_records(
         should_publish_schema=should_publish_schema,
         value_format=value_format)
 
-    df = pd.concat(df_list)
+    df = pl.concat(df_list) if df_list else pl.DataFrame()
+
+    # Uncomment for debugging purposes to view S3 data
+    # with pl.Config() as cfg:
+    #     cfg.set_tbl_cols(-1)
+    #     print(df)
 
     assert len(df) == expected_record_count, f"Expected {record_count} records in output, found {len(df)}"
 
@@ -108,3 +113,29 @@ def assertion_template(
         should_create_topic=should_create_topic, should_publish_schema=should_publish_schema,
         value_format=value_format, kwargs=kwargs)
 
+
+def get_nested_values(row, field):
+    field_parts = field.split(".")
+    candidates = [row]
+    part_counter = 0
+
+    while part_counter < len(field_parts):
+        if len(candidates) == 0:
+            return []
+
+        field_part = field_parts[part_counter]
+        new_candidates = []
+
+        for candidate in candidates:
+            if type(candidate) == list:
+                new_candidates = new_candidates + candidate
+            elif field_part in candidate:
+                new_candidates = new_candidates + [ candidate[field_part] ]
+                part_counter += 1
+            else:
+                print(f"Unknown field <{field_part}> in record <{candidate}>")
+                break
+
+        candidates = new_candidates
+
+    return candidates

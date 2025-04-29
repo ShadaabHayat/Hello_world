@@ -1,30 +1,30 @@
 
 import boto3
-import pandas as pd
+import polars as pl
 import time
 
 from kafka import KafkaConsumer
 
-import os
 import params
-
-pd.set_option('display.max_rows', 100)
-pd.set_option('display.max_columns', 16)
-pd.set_option('display.width', 1000)
 
 def read_kafka(topic: str, retries: int=10) -> list[dict]:
     consumer = KafkaConsumer(topic, bootstrap_servers=params.kafka_boostrap_clusters, group_id=None)
     while retries > 0:
-        resp = consumer.poll(1)
-        if len(resp) > 0:
-            return list(resp.values())[0]
-        else:
-            consumer.seek_to_beginning()
-            time.sleep(0.1)
+        try:
+            resp = consumer.poll(1)
+            if len(resp) > 0:
+                return list(resp.values())[0]
+            else:
+                consumer.seek_to_beginning()
+                time.sleep(1)
+        # Ignore "AssertionError: No partitions are currently assigned" error
+        # Retry after backoff
+        except AssertionError as er:
+            pass
         retries -= 1
     return None
 
-def read_s3() -> (list[pd.DataFrame], list[str]):
+def read_s3() -> (list[pl.DataFrame], list[str]):
     s3 = boto3.resource(service_name='s3', endpoint_url='http://' + params.minio_s3_endpoint)
     bucket_name = params.sink_config["bucket"]
 
@@ -34,18 +34,17 @@ def read_s3() -> (list[pd.DataFrame], list[str]):
     for summary in bucket.objects.all():
         keys.append(summary.key)
 
-    s3fs_options = {
-        "anon": False,
-        "endpoint_url": "http://" + params.minio_s3_endpoint
-    }
-
     df_list = []
     key_uris = []
 
     for key in keys:
         try:
             uri = "s3://" + bucket_name + "/" + key
-            df = pd.read_parquet(uri, storage_options=s3fs_options)
+            local_path = "/tmp/s3.data"
+
+            bucket.download_file(key, local_path)
+
+            df = pl.read_parquet(local_path)
 
             df_list.append(df)
             key_uris.append(uri)

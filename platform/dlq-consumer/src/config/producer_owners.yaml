@@ -1,0 +1,21 @@
+producers:
+  - topic_prefix: "uz_"
+    source_name: "uz"
+    dev_env_email: "aabubakar@extremenetworks.com"
+    staging_env_email: "aabubakar@extremenetworks.com"
+    prod_env_email: "aabubakar@extremenetworks.com"
+  - topic_prefix: "intel_"
+    source_name: "intel"
+    dev_env_email: "aabubakar@extremenetworks.com"
+    staging_env_email: "aabubakar@extremenetworks.com"
+    prod_env_email: "aabubakar@extremenetworks.com"
+  - topic_prefix: ""
+    source_name: "xiq"
+    dev_env_email: "aabubakar@extremenetworks.com"
+    staging_env_email: "aabubakar@extremenetworks.com"
+    prod_env_email: "aabubakar@extremenetworks.com"
+
+platform_team_email:
+  dev_env_email: "aabubakar@extremenetworks.com"
+  staging_env_email: "aabubakar@extremenetworks.com"
+  prod_env_email: "aabubakar@extremenetworks.com"

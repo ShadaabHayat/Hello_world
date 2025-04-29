@@ -1,0 +1,111 @@
+{
+	"type": "record",
+	"name": "NetworkDevice",
+	"namespace": "com.example",
+	"fields": [
+		{
+			"name": "id",
+			"type": "string"
+		},
+		{
+			"name": "last_modified_at",
+			"type": "string"
+		},
+		{
+			"name": "network_config",
+			"type": {
+				"type": "record",
+				"name": "NetworkConfig",
+				"fields": [
+					{
+						"name": "subnet_mask",
+						"type": "string"
+					},
+					{
+						"name": "gateway",
+						"type": "string"
+					},
+					{
+						"name": "interfaces",
+						"type": {
+							"type": "array",
+							"items": {
+								"type": "record",
+								"name": "Interface",
+								"fields": [
+									{
+										"name": "mac_address",
+										"type": "string"
+									},
+									{
+										"name": "settings",
+										"type": {
+											"type": "record",
+											"name": "InterfaceSettings",
+											"fields": [
+												{
+													"name": "speed",
+													"type": "string"
+												},
+												{
+													"name": "duplex",
+													"type": "string"
+												},
+												{
+													"name": "mtu",
+													"type": "int"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					}
+				]
+			}
+		},
+		{
+			"name": "security",
+			"type": {
+				"type": "record",
+				"name": "Security",
+				"fields": [
+					{
+						"name": "encryption",
+						"type": "boolean"
+					},
+					{
+						"name": "firewall",
+						"type": {
+							"type": "array",
+							"items": {
+								"type": "record",
+								"name": "Firewall",
+								"fields": [
+									{
+										"name": "rules",
+										"type": {
+											"type": "record",
+											"name": "Rules",
+											"fields": [
+												{
+													"name": "inbound",
+													"type": "string"
+												},
+												{
+													"name": "outbound",
+													"type": "string"
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					}
+				]
+			}
+		}
+	]
+}

@@ -1,0 +1,5 @@
+
+function docker() {
+  # Change if using a different OCI provider
+  podman "$@"
+}

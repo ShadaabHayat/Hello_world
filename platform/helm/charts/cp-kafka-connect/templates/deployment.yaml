@@ -37,6 +37,16 @@ spec:
       {{- if .Values.securityContext }}
 {{ toYaml .Values.securityContext | indent 8 }}
       {{- end}}
+      {{- if .Values.init.enabled }}
+      initContainers:
+        - name: {{ template "cp-kafka-connect.name" . }}-init
+          image: "{{ .Values.init.image }}:{{ .Values.init.imageTag }}"
+          imagePullPolicy: "{{ .Values.init.imagePullPolicy }}"
+          {{- if .Values.init.volumeMounts }}
+          volumeMounts:
+{{ toYaml .Values.init.volumeMounts | indent 10 }}
+          {{- end}}
+      {{- end}}
       containers:
         {{- if .Values.prometheus.jmx.enabled }}
         - name: prometheus-jmx-exporter

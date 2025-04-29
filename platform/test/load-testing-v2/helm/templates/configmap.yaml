@@ -7,6 +7,10 @@ data:
   SCHEMA_REGISTRY_URL: {{ .Values.config.schemaRegistryUrl | quote }}
   RESOURCE_DEVICE_TOPIC_NAME: {{ .Values.config.resourceDeviceTopic | quote }}
   USER_TOPIC_NAME: {{ .Values.config.userTopic | quote }}
+  NETWORK_DEVICE_TOPIC_NAME: {{ .Values.config.networkDeviceTopic | quote }}
+  PRODUCE_RESOURCE_DEVICE: {{ .Values.config.produceResourceDevice | quote }}
+  PRODUCE_USER: {{ .Values.config.produceUser | quote }}
+  PRODUCE_NETWORK_DEVICE: {{ .Values.config.produceNetworkDevice | quote }}
   K6_VUS: {{ .Values.config.k6Vus | quote }}
   K6_DURATION: {{ .Values.config.k6Duration | quote }}
   PARTITIONS_COUNT_FOR_TOPIC: {{ .Values.config.partitionsCountForTopic | quote }}

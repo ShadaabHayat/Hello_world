@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+  dlq-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      KAFKA_BROKERS: "kafka1:29092"
+      CONSUMER_GROUP_ID: "dlq-consumer-group"
+      TOPIC_NAMES: "aicore.dlq,aicore.dlq1"
+      POLL_TIMEOUT_MS: "1000"
+      OWNERSHIP_MAP_PATH: "/app/src/config/producer_owners.yaml"
+      PROMETHEUS_PORT: "8080"
+      EMAIL_SMTP_SERVER: "smtp-25.ws2r1.svc.cluster.local"
+      EMAIL_SMTP_PORT: "25"
+      EMAIL_FROM: "noreply@extremecloudiq.com"
+      RDC: "local"
+      ENV: "dev"
+      MAX_POLL_RECORDS: "100"
+      POETRY_VIRTUALENVS_CREATE: "false"
+    volumes:
+      - ./src/config/producer_owners.yaml:/app/src/config/producer_owners.yaml:ro
+    ports:
+      - "9090:8080"
+    networks:
+      - my-network
+
+  dlq-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["poetry", "run", "pytest", "--maxfail=1", "--disable-warnings", "-q"]
+    environment:
+      POETRY_VIRTUALENVS_CREATE: "false"
+      PYTHONPATH: "/app"
+    depends_on:
+      - dlq-consumer
+    volumes:
+      - ./tests/mock_ownership.yaml:/app/src/config/producer_owners.yaml:ro
+
+  dlq-test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dlq-test-runner
+    command: >
+      sh -c "
+        poetry run coverage run --source=src -m pytest tests &&
+        poetry run coverage html &&
+        echo 'Coverage report generated at htmlcov/index.html'"
+    environment:
+      POETRY_VIRTUALENVS_CREATE: "false"
+    volumes:
+      - .:/app
+      - ./htmlcov:/app/htmlcov
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./src/config/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9091:9090"
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    external: true
+    name: my-network

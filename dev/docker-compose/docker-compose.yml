@@ -57,6 +57,9 @@ services:
     container_name: connect
     ports:
       - 8083:8083
+    volumes:
+      - ./jmx-exporter:/etc/jmx-exporter
+      - ./schemas:/opt/kafka/schemas
     environment:
       CONNECT_BOOTSTRAP_SERVERS: 'kafka1:29092'
       CONNECT_REST_ADVERTISED_HOST_NAME: "connect-s3"
@@ -80,12 +83,19 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components/,/connectors/,/custom-plugins/'
+      AWS_ACCESS_KEY_ID: "minioadmin"
+      AWS_SECRET_ACCESS_KEY: "minioadmin"
+      AWS_REGION: "us-east-1"
+      # JMX Configuration
+      KAFKA_JMX_PORT: 5555
+      KAFKA_JMX_HOSTNAME: connect
+      EXTRA_ARGS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=connect -Dcom.sun.management.jmxremote.rmi.port=5555 -Dcom.sun.management.jmxremote.local.only=false"
     command:
       - bash
       - -c
       - |
         #
-        echo "Launching Kafka Connect worker"
+        echo "Launching Kafka Connect worker with JMX enabled"
         /etc/confluent/docker/run &
         #
         echo "Waiting for Kafka Connect to start listening on localhost ⏳"
@@ -99,8 +109,21 @@ services:
         done
         sleep infinity
 
+  connect-jmx-exporter:
+    image: bitnami/jmx-exporter:0.19.0
+    container_name: connect-jmx-exporter
+    ports:
+      - "5556:5556"
+    volumes:
+      - ./jmx-exporter/kafka-connect-prometheus.yml:/opt/bitnami/jmx-exporter/config.yml
+    command:
+      - "5556"
+      - "/opt/bitnami/jmx-exporter/config.yml"
+    depends_on:
+      - connect
+
   minio:
-    image: minio/minio:RELEASE.2024-08-29T01-40-52Z
+    image: minio/minio:RELEASE.2025-02-07T23-21-09Z
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -109,7 +132,7 @@ services:
   aws:
     image: amazon/aws-cli
     container_name: aws-cli
-    command: -c "sleep 2 && aws --endpoint-url http://minio:9000 s3 mb s3://my-bucket --region eu-west-1 || exit 0"
+    command: -c "sleep 2 && aws --endpoint-url http://minio:9000 s3 mb s3://my-bucket --region us-east-1 || exit 0"
     entrypoint: [/bin/bash]
     environment:
       AWS_ACCESS_KEY_ID: "minioadmin"

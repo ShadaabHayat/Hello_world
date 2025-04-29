@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  e2e-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: e2e-tests
+    environment:
+      BOOTSTRAP_SERVERS: kafka1:29092
+      KAFKA_UI_ENDPOINT: kafka-ui:8080
+      KAFKA_CONNECT_ENDPOINT: connect:8083
+      SCHEMA_REGISTRY_ENDPOINT: schema-registry:8081
+      MINIO_S3_ENDPOINT: 'minio:9000'
+      TEST_TABLE_NAME: users
+      SINK_BUKCET_NAME: my-bucket
+      AWS_ACCESS_KEY_ID: 'minioadmin'
+      AWS_SECRET_ACCESS_KEY: 'minioadmin'
+      SINK_CONNECTOR_NAME: s3-sink-connector
+      PYTHONUNBUFFERED: '0'
+    volumes:
+      - .:/code  # Mount the current directory (with all test files) to /code in the container
+    working_dir: /code
+    command: python3 -u -m pytest -rA --show-capture stderr /code/main.py
+
+networks:
+  default:
+    name: my-network
+    external: true

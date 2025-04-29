@@ -19,7 +19,7 @@ kubectl apply -f minikube/minio.yaml
 kubectl apply -f minikube/kafka-core.yaml
 
 kubectl wait statefulset kafka-cluster --for=condition=Available=True --timeout=60s
-kubectl wait deployment kafka-schema-registry --for=condition=Available=True --timeout=10s
+kubectl wait deployment kafka-schema-registry --for=condition=Available=True --timeout=45s
 kubectl wait deployment kafka-ui --for=condition=Available=True --timeout=10s
 
 kubectl get pods -A
@@ -34,10 +34,15 @@ kubectl logs -f kafka-cluster-1 | grep -qF "Kafka Server started"
 kubectl logs -f kafka-cluster-2 | grep -qF "Kafka Server started"
 
 kubectl apply -f minikube/kafka-connect.yaml
-kubectl wait deployment kafka-connect --for=condition=Available=True --timeout=30s
-kubectl wait deployment minio --for=condition=Available=True --timeout=10s
 
+kubectl wait deployment minio --for=condition=Ready=True --timeout=10s
+
+before=$(date +%s)
+kubectl wait deployment kafka-connect --for=condition=Available=True --timeout=30s
 echo "Waiting for kafka connect to start"
 kubectl logs -l app=kafka-connect -f | grep -qF "Kafka Connect started"
+after=$(date +%s)
+
+echo "Took $((after - before))s for Kafka Connect"
 
 kubectl get pods -A

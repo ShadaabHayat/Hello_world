@@ -1,21 +1,23 @@
 # Kafka Load Testing v2
 
-This project contains k6 scripts for load testing the ingestion engine. It supports producing user and device data simultaneously in common kafka topics while generating performance reports.
+This project contains k6 scripts for load testing the ingestion engine. It supports producing user, resource device, and network device data simultaneously in common kafka topics while generating performance reports. The framework supports both Avro and JSON schema formats.
 
 ## Project Structure
 
 ```
 load-testing-v2/
 ├── scripts/
-│   ├── kafka_producer.js    # Base Kafka producer implementation
-│   ├── main.js              # Main test script with producer logic
-│   └── schemas/            # Avro schemas
+│   ├── kafka_avro_producer.js   # Avro schema producer implementation
+│   ├── kafka_json_producer.js   # JSON schema producer implementation
+│   ├── config.js                # Shared configuration
+│   ├── main.js                  # Main test script with producer logic
+│   └── schemas/                 # Schema definitions
 │       ├── resource_device_schema.js
-│       └── user_schema.js
-|       |.................
-├── docker-compose.yml      # Docker environment setup
-├── Dockerfile             # k6 with Kafka extension
-└── run-all.sh            # Test execution script
+│       ├── user_schema.js
+│       └── network_device_schema.js
+├── docker-compose.yml           # Docker environment setup
+├── Dockerfile                   # k6 with Kafka extension
+└── run-all.sh                   # Test execution script
 ```
 
 ## Prerequisites
@@ -32,7 +34,7 @@ docker-compose build
 
 for linux
 
-docker build --platform linux/amd64 -t jawadahmadd/k6-load-testing:v1 .
+docker build --platform linux/amd64 -t 438465127823.dkr.ecr.us-east-1.amazonaws.com/aicore-ingestion-engine/k6-load-testing:v7 .
 ```
 
 This will:
@@ -52,8 +54,14 @@ environment:
   SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
   RESOURCE_DEVICE_TOPIC_NAME: "aicore-resource-device"
   USER_TOPIC_NAME: "aicore-users-topic"
+  NETWORK_DEVICE_TOPIC_NAME: "aicore-network-device"
+  PRODUCE_RESOURCE_DEVICE: "true"
+  PRODUCE_USER: "true"
+  PRODUCE_NETWORK_DEVICE: "true"
   K6_VUS: "100"
   K6_DURATION: "2s"
+  PARTITIONS_COUNT_FOR_TOPIC: "4"
+  SCHEMA_TYPE: "avro"  # Options: "avro" or "json"
 ```
 
 ### Run the tests
@@ -88,16 +96,18 @@ docker run --rm -it -e GOOS=darwin -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" \
 The test performs the following:
 
 1. **Schema Registration**:
-   - Registers Avro schemas for both user and device data
-   - Validates schema compatibility
+   - Registers schemas for resource device, user, and network device data
+   - Supports both Avro and JSON schema formats
+   - Validates schema compatibility with the registry
 
 2. **Parallel Execution**:
-   - Runs user and device producers simultaneously
+   - Runs multiple producers simultaneously based on enabled topics
    - Each producer has its own VU (Virtual User) configuration
 
 3. **Data Generation**:
-   - Generates realistic random data for both users and devices
-   - Follows the defined Avro schema structure
+   - Generates realistic random data for all enabled topics
+   - Supports complex nested structures (up to 3 levels of nesting)
+   - Follows the defined schema structure
 
 4. **Performance Monitoring**:
    - Generates JSON and text summaries
@@ -109,7 +119,9 @@ Adjust these parameters for optimal performance:
 
 - `K6_VUS`: Increase for higher throughput
 - `K6_DURATION`: Extend for longer test runs
-- Producer configurations in `kafka_producer.js`
+- `PRODUCE_*` flags: Enable/disable specific topics to focus testing
+- `SCHEMA_TYPE`: Choose between "avro" or "json" formats
+- Producer configurations in the respective producer implementation files
 
 ## Reports
 
@@ -147,8 +159,16 @@ The application can be deployed to Kubernetes using the provided Helm chart in t
 config:
   kafkaBrokers: "your-kafka-brokers"
   schemaRegistryUrl: "your-schema-registry-url"
+  resourceDeviceTopicName: "aicore-resource-device"
+  userTopicName: "aicore-users-topic"
+  networkDeviceTopicName: "aicore-network-device"
+  produceResourceDevice: "true"
+  produceUser: "true"
+  produceNetworkDevice: "true"
   k6Vus: "100"
   k6Duration: "2s"
+  partitionsCountForTopic: "4"
+  schemaType: "avro"  # Options: "avro" or "json"
 ```
 
 2. Install the chart:
@@ -195,5 +215,7 @@ helm uninstall k6-load-test
 
 1. Follow the existing code structure
 2. Update schemas in the `schemas` directory
-3. Update main.js to produce message with the new schema/data.
-4. Test changes using both Docker Compose and standalone modes
+3. Update main.js to produce message with the new schema/data
+4. Test changes using both Avro and JSON schema types
+5. Test with different combinations of topic production flags
+6. Test changes using both Docker Compose and standalone modes

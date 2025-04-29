@@ -1,12 +1,14 @@
 
 from kafka import KafkaProducer
 from kafka.admin import KafkaAdminClient, NewTopic
+from kafka.errors import *
 
 import avro.schema
 from avro.io import DatumWriter, BinaryEncoder
 
 import requests
 
+import random
 import time
 from io import BytesIO
 import json
@@ -59,7 +61,22 @@ topic_avro_schema = {
                             "name": "arr1",
                             "type": {
                                 "type": "array",
-                                "items": "int"
+                                "items": {
+                                "type": "record",
+                                "name": "ArrayItem",
+                                "fields": [
+                                 {
+                                   "name": "username",
+                                   "type": ["string", "null"],
+                                   "default": "null"
+                                 },
+                                 {
+                                   "name": "metadata",
+                                   "type": ["string", "null"],
+                                   "default": "null"
+                                 }
+                                ]
+                              }
                             },
                             "default": "null"
                         }
@@ -125,10 +142,27 @@ topic_json_schema = {
             "arr1": {
                 "type": "array",
                 "items": {
-                    "type": "integer"
+                    "type": "object",
+                    "properties": {
+                        "username": {
+                            "type": "string"
+                        },
+                        "metadata": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         }
+    },
+    "__op": {
+        "type": "string"
+    },
+    "__ts_ms": {
+        "type": "integer"
+    },
+    "__deleted": {
+        "type": "string"
     }
   }
 }
@@ -216,7 +250,7 @@ def push_record(producer, topic, record: dict, value_format="AVRO") -> None:
 
 def create_topic(topic: str) -> None:
     admin_client = KafkaAdminClient(
-        bootstrap_servers=params.kafka_boostrap_clusters, 
+        bootstrap_servers=params.kafka_boostrap_clusters,
         client_id=None
     )
 
@@ -224,7 +258,7 @@ def create_topic(topic: str) -> None:
     topic_list.append(NewTopic(name=topic, num_partitions=1, replication_factor=1))
     try:
         admin_client.create_topics(new_topics=topic_list, validate_only=False)
-    except kafka.errors.TopicAlreadyExistsError as e:
+    except TopicAlreadyExistsError as e:
         return
 
     # Wait for topic to be created
@@ -266,7 +300,10 @@ def generate_record_for_id(record_id: int, op: str) -> dict:
             "nest1": {
                 "str2": "xyz-" + str(record_id),
                 "str3": "pqr-" + str(record_id),
-                "arr1": list(range(record_id))
+                "arr1": [{
+                    "username": "user_" + str(record_id + i),
+                    "metadata": "meta_" + str(record_id + i)
+                } for i in range(random.randint(0, 5))]
             },
             "__op": operation_map[op]
         }

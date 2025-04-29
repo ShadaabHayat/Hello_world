@@ -16,8 +16,8 @@ data:
     ssl: false
     whitelistObjectNames:
       - kafka.connect:*
-      - debezium.*:*
       - io.confluent.*:*
+      - "kafka.connect:type=task-error-metrics,*"
     rules:
       # Kafka Connect worker metrics
       - pattern: "kafka.connect<type=connect-worker-metrics>([^:]+)"
@@ -68,83 +68,55 @@ data:
           task: "$2"
           connector_name: "$1"
 
-      # Debezium source metrics
-      - pattern: "kafka.connect<type=connector-metrics, connector=([^:]+)><>([^:]+)"
-        name: aicore_debezium_metrics_$2
+
+
+      # Task error metrics - comprehensive approach with multiple patterns
+      # Pattern for total error metrics
+      - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)-total"
+        name: aicore_kafka_connect_task_error_$3_total
+        type: COUNTER
+        labels:
+          connector: "$1"
+          task: "$2"
+
+      # Pattern for count error metrics
+      - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)-count"
+        name: aicore_kafka_connect_task_error_$3_count
         type: GAUGE
         labels:
           connector: "$1"
-          name: "$1"
+          task: "$2"
 
-      - pattern: "debezium.([^:]+)<type=connector-metrics, context=([^,]+), server=([^,]+), key=([^>]+)><>RowsScanned"
-        name: aicore_debezium_rows_scanned
-        type: COUNTER
-        labels:
-          plugin: "$1"
-          context: "$2"
-          table: "$4"
-          name: "debezium-connector-$3"
-
-      - pattern: "debezium.([^:]+)<type=connector-metrics, context=([^,]+), server=([^>]+)>([^:]+)"
-        name: aicore_debezium_metrics_$4
+      # Pattern for rate error metrics
+      - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)-rate"
+        name: aicore_kafka_connect_task_error_$3_rate
         type: GAUGE
         labels:
-          plugin: "$1"
-          context: "$2"
-          name: "debezium-connector-$3"
+          connector: "$1"
+          task: "$2"
 
-      # Streaming metrics
-      - pattern: "debezium.([^:]+)<type=connector-metrics, server=([^,]+), task=([^>]+)><>([^:]+)"
-        name: aicore_debezium_streaming_$4
+      # Pattern for average error metrics
+      - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)-avg"
+        name: aicore_kafka_connect_task_error_$3_avg
         type: GAUGE
         labels:
-          plugin: "$1"
-          task: "$3"
-          name: "debezium-connector-$2"
+          connector: "$1"
+          task: "$2"
 
-      # Queue metrics
-      - pattern: "debezium.([^:]+)<type=connector-metrics, server=([^,]+), task=([^>]+)><>QueueTotalCapacity"
-        name: aicore_debezium_queue_capacity_total
+      # Pattern for max error metrics
+      - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)-max"
+        name: aicore_kafka_connect_task_error_$3_max
         type: GAUGE
         labels:
-          plugin: "$1"
-          task: "$3"
-          name: "debezium-connector-$2"
-
-      - pattern: "debezium.([^:]+)<type=connector-metrics, server=([^,]+), task=([^>]+)><>QueueRemainingCapacity"
-        name: aicore_debezium_queue_remaining_capacity
+          connector: "$1"
+          task: "$2"
+          
+      # Catch-all pattern for any other task error metrics
+      - pattern: "kafka.connect<type=task-error-metrics, connector=([^,]+), task=([^,]+)><>([^:]+)"
+        name: aicore_kafka_connect_task_error_$3
         type: GAUGE
         labels:
-          plugin: "$1"
-          task: "$3"
-          name: "debezium-connector-$2"
-
-      # Table-specific event metrics
-      - pattern: "debezium.([^:]+)<type=connector-metrics, context=([^,]+), server=([^,]+), table=([^>]+)><>NumberOfEvents"
-        name: aicore_debezium_table_events_total
-        type: COUNTER
-        labels:
-          plugin: "$1"
-          context: "$2"
-          table: "$4"
-          name: "debezium-connector-$3"
-
-      - pattern: "debezium.([^:]+)<type=connector-metrics, context=([^,]+), server=([^,]+), table=([^>]+)><>CaptureState"
-        name: aicore_debezium_table_capture_state
-        type: GAUGE
-        labels:
-          plugin: "$1"
-          context: "$2"
-          table: "$4"
-          name: "debezium-connector-$3"
-
-      - pattern: "debezium.([^:]+)<type=connector-metrics, context=([^,]+), server=([^,]+), table=([^>]+)><>LastEvent"
-        name: aicore_debezium_table_last_event_timestamp
-        type: GAUGE
-        labels:
-          plugin: "$1"
-          context: "$2"
-          table: "$4"
-          name: "debezium-connector-$3"
+          connector: "$1"
+          task: "$2"
 
 {{- end }}

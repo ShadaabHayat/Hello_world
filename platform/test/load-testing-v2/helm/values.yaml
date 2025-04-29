@@ -2,7 +2,7 @@
 replicaCount: 3
 
 image:
-  repository: jawadahmadd/k6-load-testing
+  repository: 438465127823.dkr.ecr.us-east-1.amazonaws.com/aicore-ingestion-engine/k6-load-testing
   tag: v7
   pullPolicy: Always
 
@@ -11,6 +11,10 @@ config:
   schemaRegistryUrl: "http://cp-schema-registry-common-kafka.common.svc.cluster.local:8081"
   resourceDeviceTopic: "aicore-resource-device"
   userTopic: "aicore-users-topic"
+  networkDeviceTopic: "aicore-network-device"
+  produceResourceDevice: "true"
+  produceUser: "true"
+  produceNetworkDevice: "true"
   k6Vus: "5"
   k6Duration: "3600s"
   partitionsCountForTopic: "10"

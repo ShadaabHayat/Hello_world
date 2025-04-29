@@ -1,0 +1,90 @@
+{
+	"title": "NetworkDevice",
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "string"
+		},
+		"created_at": {
+			"type": "string"
+		},
+		"last_modified_at": {
+			"type": "string"
+		},
+		"status": {
+			"type": "string"
+		},
+		"network_config": {
+			"type": "object",
+			"properties": {
+				"ip_address": {
+					"type": "string"
+				},
+				"data_in_bytes": {
+					"type": "integer"
+				},
+				"data_out_bytes": {
+					"type": "integer"
+				},
+				"subnet_mask": {
+					"type": "string"
+				},
+				"gateway": {
+					"type": "string"
+				},
+				"interfaces": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"mac_address": {
+								"type": "string"
+							},
+							"settings": {
+								"type": "object",
+								"properties": {
+									"speed": {
+										"type": "string"
+									},
+									"duplex": {
+										"type": "string"
+									},
+									"mtu": {
+										"type": "integer"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"security": {
+			"type": "object",
+			"properties": {
+				"encryption": {
+					"type": "boolean"
+				},
+				"firewall": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"rules": {
+								"type": ["object", "null"],
+								"properties": {
+									"inbound": {
+										"type": "string"
+									},
+									"outbound": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

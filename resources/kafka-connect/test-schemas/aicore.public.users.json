@@ -1,0 +1,42 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"group": "aicore.public.users",
+	"title": "Value",
+	"properties": {
+		"id": {
+			"type": "integer"
+		},
+		"num1": {
+			"type": "integer"
+		},
+		"nest1": {
+			"type": "object",
+			"properties": {
+				"str2": {
+					"type": "string"
+				},
+				"str3": {
+					"type": "string"
+				},
+				"arr1": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"username": {
+								"type": "string"
+							}
+						}
+					}
+				}
+			}
+		},
+		"__op": {
+			"type": "string"
+		},
+		"__deleted": {
+			"type": "string"
+		}
+	}
+}

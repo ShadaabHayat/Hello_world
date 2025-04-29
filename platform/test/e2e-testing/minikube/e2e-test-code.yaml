@@ -15,7 +15,12 @@ spec:
         image: localhost/python:e2e-test
         imagePullPolicy: Never
         command: ["python3"]
+        # Enable for normal output
         args: ["-u", "-m", "pytest", "-rA", "--show-capture", "stderr", "/code/main.py"]
+
+        # Enable for debugging test output
+        #args: ["-u", "-m", "pytest", "-rA", "-s", "-vvvv", "/code/main.py"]
+
         env:
           - name: PYTHONUNBUFFERED
             value: '0'
