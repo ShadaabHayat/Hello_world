@@ -26,7 +26,7 @@ env:
 jobs:
   security-scan:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -60,7 +60,7 @@ jobs:
 
   test-and-code-coverage:
     name: Test and Code Coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       pull-requests: write
@@ -84,7 +84,6 @@ jobs:
 
       - name: Generate Coverage Report
         run: |
-          cd resources/kafka-connect/custom-smt
           mvn clean jacoco:prepare-agent test jacoco:report
 
       - name: Upload Coverage HTML Report
@@ -114,7 +113,7 @@ jobs:
   build-image-and-push-to-ecr:
     name: Build and Push Docker Image
     needs: test-and-code-coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       id-token: write
       contents: read
