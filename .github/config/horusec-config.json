@@ -22,7 +22,6 @@
       "**/.git/**",
       "**/.idea/**"
     ],
-    "projectPath": "./ingestion-engine/custom-smt/src/main/java",
     "tools_config": {
       "HorusecEngine": {
         "istoignore": false
