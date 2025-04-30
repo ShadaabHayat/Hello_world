@@ -16,8 +16,8 @@ spec:
         imagePullPolicy: Never
         command: ["python3"]
         # Enable for normal output
-        # args: ["-u", "-m", "pytest", "-rA", "--show-capture", "stderr", "/code/main.py"]
-        args: ["-u", "-m", "pytest", "-n", "2", "-rA", "--show-capture", "stderr", "/code/main.py"]
+        args: ["-u", "-m", "pytest", "-rA", "--show-capture", "stderr", "/code/main.py"]
+        # args: ["-u", "-m", "pytest", "-n", "2", "-rA", "--show-capture", "stderr", "/code/main.py"]
 
         # Enable for debugging test output
         #args: ["-u", "-m", "pytest", "-rA", "-s", "-vvvv", "/code/main.py"]
