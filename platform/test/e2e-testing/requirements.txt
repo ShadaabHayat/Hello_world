@@ -4,3 +4,4 @@ boto3==1.36.22
 pytest==8.3.4
 kafka-python==2.0.3
 avro==1.12.0
+pytest-xdist==3.6.1 
