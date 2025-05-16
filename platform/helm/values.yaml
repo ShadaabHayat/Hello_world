@@ -16,6 +16,7 @@ connectors:
   - intel-xvs-table-data
   - uz-timeseries-data
   
+
 # Overrides allow modifying values in a connector's default configuration or defining a new connector.
 # Example:
 # configOverrides:
