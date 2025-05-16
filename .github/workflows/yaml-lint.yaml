@@ -29,12 +29,12 @@ jobs:
       - name: Lint YAML files
         if: steps.changed.outputs.changed_files != ''
         run: |
-          echo "${{ steps.changed.outputs.changed_files }}" |
-            grep -E '\.ya?ml$' \
-            | xargs -r -n1 bash -c '
-              if [ -f "$1" ]; then
-              yamllint "$1"
+          echo "${{ steps.changed.outputs.changed_files }}" | grep -E '\.ya?ml$' | xargs -r -n1 -I {} bash -c '
+            file="{}"
+            if [ -f "$file" ]; then
+              echo "Linting $file"
+              yamllint "$file"
             else
-              echo "Skipping missing file: $1"
+              echo "Skipping missing file: $file"
             fi
-            ' _
+          '        
