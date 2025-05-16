@@ -31,9 +31,11 @@ jobs:
         run: |
           echo "${{ steps.changed.outputs.changed_files }}"
           echo "empty"
-          echo "${{ steps.changed.outputs.changed_files }}" | grep -E '\.ya?ml$'
+          echo "${{ steps.changed.outputs.changed_files }}" | 
+          grep -E '\.ya?ml$'
           echo "empty"
-          echo "${{ steps.changed.outputs.changed_files }}" | grep -E '\.ya?ml$' \
+          echo "${{ steps.changed.outputs.changed_files }}" | 
+            grep -E '\.ya?ml$' \
             | xargs -r -n1 bash -c '
               if [ -f "$1" ]; then
               yamllint "$1"
