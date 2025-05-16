@@ -31,10 +31,10 @@ jobs:
         run: |
           echo "${{ steps.changed.outputs.changed_files }}"
           echo "empty"
-          echo "${{ steps.changed.outputs.changed_files }}" | 
+          echo "${{ steps.changed.outputs.changed_files }}" |
           grep -E '\.ya?ml$'
           echo "empty"
-          echo "${{ steps.changed.outputs.changed_files }}" | 
+          echo "${{ steps.changed.outputs.changed_files }}" |
             grep -E '\.ya?ml$' \
             | xargs -r -n1 bash -c '
               if [ -f "$1" ]; then
