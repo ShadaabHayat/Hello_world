@@ -16,7 +16,7 @@ jobs:
         id: changed
         run: |
           git fetch origin ${{ github.base_ref }}
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }} HEAD | grep -E '\.ya?ml$|\.json$' || true)
+          CHANGED=$(git diff --name-only --diff-filter=AMRCT origin/${{ github.base_ref }} HEAD | grep -E '\.ya?ml$|\.json$' || true)          
           echo "changed_files<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGED" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -29,14 +29,4 @@ jobs:
       - name: Lint YAML files
         if: steps.changed.outputs.changed_files != ''
         run: |
-          echo "${{ steps.changed.outputs.changed_files }}"
-          echo "empty"
-          echo "${{ steps.changed.outputs.changed_files }}" |
-            grep -E '\.ya?ml$' \
-            | xargs -r -n1 bash -c '
-              if [ -f "$1" ]; then
-              yamllint "$1"
-            else
-              echo "Skipping missing file: $1"
-            fi
-            ' _
+          echo "${{ steps.changed.outputs.changed_files }}" | grep -E '\.ya?ml$' | xargs -r yamllint
