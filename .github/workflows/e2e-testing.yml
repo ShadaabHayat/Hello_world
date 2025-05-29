@@ -28,3 +28,33 @@ jobs:
 
     - name: Create KIND Cluster
       run: kind create cluster --wait 120s
+
+    - name: Build Kafka Connect Image
+      uses: docker/build-push-action@v5
+      with:
+        context: resources/kafka-connect
+        load: true
+        tags: kafka-connect-custom:e2e-test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build E2E Test Image
+      uses: docker/build-push-action@v5
+      with:
+        context: platform/test/e2e-testing
+        load: true
+        tags: python:e2e-test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Load Docker Images into KIND
+      run: |
+        kind load docker-image kafka-connect-custom:e2e-test python:e2e-test
+
+    - name: Load Docker Images into KIND
+      run: |
+        kubectl apply -f minikube/minio.yaml;
+        kubectl apply -f minikube/kafka-core.yaml;
+
+
+        
