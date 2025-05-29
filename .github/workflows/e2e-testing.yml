@@ -52,11 +52,16 @@ jobs:
         kind load docker-image kafka-connect-custom:e2e-test python:e2e-test
         kubectl get nodes;
 
-    - name: Load Docker Images into KIND
-      run: |
-        kubectl apply -f platform/test/e2e-testing/minikube/minio.yaml;
-        kubectl apply -f platform/test/e2e-testing/minikube/kafka-core.yaml;
-        kubectl apply -f platform/test/e2e-testing/minikube/kafka-connect.yaml;
+    # - name: Deploy Components
+    #   run: |
+    #     kubectl apply -f platform/test/e2e-testing/minikube/minio.yaml;
+    #     kubectl apply -f platform/test/e2e-testing/minikube/kafka-core.yaml;
+    #     kubectl apply -f platform/test/e2e-testing/minikube/kafka-connect.yaml;
 
-
-        
+    - name: Deploy test components
+      shell: bash
+      run: "platform/test/e2e-testing/scripts/init-minikube.sh"
+    
+    - name: Running tests
+      shell: bash
+      run: "platform/test/e2e-testing/scripts/run-e2e-test.sh"

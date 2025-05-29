@@ -6,13 +6,6 @@ else
     DIR="$GITHUB_WORKSPACE"
 fi
 
-KAFKA_CONNECT_IMAGE="localhost/s3-custom-image:e2e-test"
-KAFKA_CONNECT_SAVE_DIR="/tmp/images/kafka-connect"
-
-#Load image tar from github action cache
-echo "Loading image <$KAFKA_CONNECT_IMAGE>"
-minikube image load "$KAFKA_CONNECT_SAVE_DIR/kafka-connect-image.tar"
-
 cd "$DIR/platform/test/e2e-testing"
 
 kubectl apply -f minikube/minio.yaml

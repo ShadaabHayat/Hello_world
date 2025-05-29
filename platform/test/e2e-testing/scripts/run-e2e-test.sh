@@ -6,13 +6,6 @@ else
     DIR="$GITHUB_WORKSPACE"
 fi
 
-E2E_TEST_IMAGE="localhost/python:e2e-test"
-E2E_TEST_SAVE_DIR="/tmp/images/e2e-test"
-
-#Load image tar from github action cache
-echo "Loading image <$E2E_TEST_IMAGE>"
-minikube image load "$E2E_TEST_SAVE_DIR/e2e-image.tar"
-
 cd "$DIR/platform/test/e2e-testing"
 
 kubectl apply -f minikube/e2e-test-code.yaml

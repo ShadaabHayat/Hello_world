@@ -12,7 +12,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: e2e-test
-        image: localhost/python:e2e-test
+        image: python:e2e-test
         imagePullPolicy: Never
         command: ["python3"]
         # Enable for normal output
