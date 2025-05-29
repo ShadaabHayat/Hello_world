@@ -53,8 +53,9 @@ jobs:
 
     - name: Load Docker Images into KIND
       run: |
-        kubectl apply -f minikube/minio.yaml;
-        kubectl apply -f minikube/kafka-core.yaml;
+        kubectl apply -f platform/test/e2e-testing/minikube/minio.yaml;
+        kubectl apply -f platform/test/e2e-testing/minikube/kafka-core.yaml;
+        kubectl apply -f platform/test/e2e-testing/minikube/kafka-connect.yaml;
 
 
         
