@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: kafka-connect
-        image: s3-custom-image:e2e-test
+        image: kafka-connect-custom:e2e-test
         imagePullPolicy: Never
         ports:
           - containerPort: 8083
