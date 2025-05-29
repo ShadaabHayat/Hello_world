@@ -50,6 +50,7 @@ jobs:
     - name: Load Docker Images into KIND
       run: |
         kind load docker-image kafka-connect-custom:e2e-test python:e2e-test
+        kubectl get nodes;
 
     - name: Load Docker Images into KIND
       run: |
