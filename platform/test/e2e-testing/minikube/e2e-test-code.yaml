@@ -15,12 +15,7 @@ spec:
         image: python:e2e-test
         imagePullPolicy: Never
         command: ["python3"]
-        # Enable for normal output
-        args: ["-u", "-m", "pytest", "-rA", "--show-capture", "stderr", "/code/main.py"]
-        # args: ["-u", "-m", "pytest", "-n", "2", "-rA", "--show-capture", "stderr", "/code/main.py"]
-
-        # Enable for debugging test output
-        #args: ["-u", "-m", "pytest", "-rA", "-s", "-vvvv", "/code/main.py"]
+        args: ["-u", "-m", "pytest", "-rA", "--show-capture", "stderr", "main.py"]
 
         env:
           - name: PYTHONUNBUFFERED
@@ -46,10 +41,3 @@ spec:
               configMapKeyRef:
                 name: kafka-cluster-bootstrap-servers
                 key: BOOTSTRAP_SERVERS
-        volumeMounts:
-         - name: e2e-test-code
-           mountPath: /code
-      volumes:
-        - name: e2e-test-code
-          hostPath:
-            path: "/e2e-code"
