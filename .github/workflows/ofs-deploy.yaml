@@ -37,7 +37,7 @@ jobs:
       - name: Set environment file name
         id: set_env
         run: |
-          echo "ENV_FILE=helm-charts/values-${{ github.event.inputs.environment }}.yaml" >> $GITHUB_ENV
+          echo "ENV_FILE=helm-chart/values-${{ github.event.inputs.environment }}.yaml" >> $GITHUB_ENV
 
       - name: Update image tag in ${{ env.ENV_FILE }}
         uses: mikefarah/yq@master
