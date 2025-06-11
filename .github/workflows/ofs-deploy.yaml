@@ -39,11 +39,21 @@ jobs:
         run: |
           echo "ENV_FILE=helm-chart/values-${{ github.event.inputs.environment }}.yaml" >> $GITHUB_ENV
 
-      - name: Update image tag in ${{ env.ENV_FILE }}
-        uses: mikefarah/yq@master
-        with:
-          cmd: |
-            yq e -i '.image.tag = "v${{ inputs.image_tag }}"' $ENV_FILE
+      - name: Install yq
+        run: |
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+          yq --version  # Confirm it's installed
+      
+      - name: Update image tag without changing format
+        run: |
+          yq e --inplace --prettyPrint=false '.image.tag = "v${{ github.event.inputs.image_tag }}"' $ENV_FILE
+      
+      # - name: Update image tag in ${{ env.ENV_FILE }}
+      #   uses: mikefarah/yq@master
+      #   with:
+      #     cmd: |
+      #       yq e -i '.image.tag = "v${{ inputs.image_tag }}"' $ENV_FILE
 
       - name: Commit and push changes
         env:
