@@ -10,11 +10,11 @@ image:
   # This sets the pull policy for images.
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "vv1.2.2"
+  tag: "vv3.3.3"
 # This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
-  # - name: ecr-secret
-  # This is to override the chart name.
+# - name: ecr-secret
+# This is to override the chart name.
 nameOverride: ""
 fullnameOverride: ""
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
