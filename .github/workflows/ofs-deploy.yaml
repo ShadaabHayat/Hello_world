@@ -43,6 +43,7 @@ jobs:
 
       - name: Update image tag in ${{ env.ENV_FILE }}
         uses: mikefarah/yq@master
+        working-directory: ./helm-chart
         with:
           cmd: |
               yq e -i '.image.tag = "v${{ inputs.image_tag }}"' $ENV_FILE
