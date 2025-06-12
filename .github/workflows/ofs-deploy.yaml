@@ -42,7 +42,7 @@ jobs:
         uses: mikefarah/yq@master
         with:
           cmd: |
-            yq e -i '.image.tag = "v${{ inputs.image_tag }}"' $ENV_FILE
+            yq e -i '.image.tag = "${{ inputs.image_tag }}"' $ENV_FILE
 
       - name: Commit and push changes
         env:
@@ -50,6 +50,6 @@ jobs:
         run: |
           git config user.name "${{ github.actor }}"
           git add $ENV_FILE
-          git commit -m "Update image tag to ${{ inputs.image_tag }} for ${{ inputs.environment }} (triggered by ${{ github.actor }})"
+          git commit -m "Update image tag to ${{ inputs.image_tag }} for ${{ inputs.environment }} (triggered by ${{ github.actor }}, {{ github.actor_id }}, {{ github.triggering_actor }})"
           git push
     
