@@ -51,5 +51,5 @@ jobs:
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
           git add $ENV_FILE
-          git commit -m "Triggered deployment workflow to Update image tag to ${{ inputs.image_tag }} for ${{ inputs.environment }}"
+          git commit -m "Update image tag to '${{ inputs.image_tag }}' in '${{ inputs.environment }}' environment via deployment workflow"
           git push
