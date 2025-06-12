@@ -16,7 +16,7 @@ on:
           - ws2-aicore
       image_tag:
         description: 'Image tag to update (e.g., v0.0.6)'
-        required: false
+        required: true
         type: string
 
 defaults:
@@ -53,4 +53,3 @@ jobs:
           git add $ENV_FILE
           git commit -m "Triggered deployment workflow to Update image tag to ${{ inputs.image_tag }} for ${{ inputs.environment }}"
           git push
-    
