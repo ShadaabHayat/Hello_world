@@ -1,0 +1,21 @@
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test-rule
+  namespace: test
+spec:
+  groups:
+    - name: example-group
+      rules:
+        - alert: TestAlert
+          expr: vector(1)
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "This is a test alert"
+{{- else }}
+# Skipped PrometheusRule because monitoring.coreos.com/v1 is not available
+{{- end }}
+
